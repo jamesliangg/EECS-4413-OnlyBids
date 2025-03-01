@@ -1,5 +1,6 @@
 const express = require('express')
 const userRoutes = require('./routes/userRoutes')
+const searchRoutes = require('./routes/searchRoutes')
 require('dotenv').config()
 
 const app = express()
@@ -10,6 +11,9 @@ app.use(express.json())
 
 // User routes
 app.use('/api', userRoutes)
+
+// Search routes
+app.use('/api/search/', searchRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
