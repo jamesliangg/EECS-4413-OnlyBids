@@ -30,6 +30,7 @@ CREATE TABLE Auction (
     start_time DATETIME NOT NULL,
     end_time DATETIME NOT NULL,
     status ENUM('ongoing', 'completed', 'canceled') DEFAULT 'ongoing',
+    type ENUM('forward', 'dutch') DEFAULT 'forward',
     winner_id INT NULL,
     final_price DECIMAL(10,2) NULL,
     FOREIGN KEY (item_id) REFERENCES Item(item_id) ON DELETE CASCADE,

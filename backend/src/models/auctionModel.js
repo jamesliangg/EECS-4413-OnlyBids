@@ -21,10 +21,10 @@ const AuctionModel = {
 
   // Create a new auction record.
   createAuction: async (auctionData) => {
-    const { item_id, start_time, end_time, status, winner_id, final_price } = auctionData;
+    const { item_id, start_time, end_time, status, winner_id, final_price, type } = auctionData;
     const [result] = await db.query(
-      "INSERT INTO Auction (item_id, start_time, end_time, status, winner_id, final_price) VALUES (?, ?, ?, ?, ?, ?)",
-      [item_id, start_time, end_time, status || 'ongoing', winner_id || null, final_price || null]
+      "INSERT INTO Auction (item_id, start_time, end_time, status, winner_id, final_price, type) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [item_id, start_time, end_time, status || 'ongoing', winner_id || null, final_price || null, type]
     );
     return result.insertId; 
   },

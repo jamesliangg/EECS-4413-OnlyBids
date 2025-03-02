@@ -31,9 +31,9 @@ const auctionController = {
       },
 
       createAuction: async (req, res) => {
-        const { item_id, start_time, end_time, status, winner_id, final_price } = req.body;
+        const { item_id, start_time, end_time, status, winner_id, final_price, type } = req.body;
         try {
-            const result = await AuctionModel.createAuction({ item_id, start_time, end_time, status, winner_id, final_price });
+            const result = await AuctionModel.createAuction({ item_id, start_time, end_time, status, winner_id, final_price, type });
             if(!result) return res.status(404).json({ error: 'Auction not created' });
             res.status(200).json({ message: 'Auction created successfully!', auctionId: result });
         } catch (error) {
