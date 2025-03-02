@@ -1,6 +1,6 @@
 const AuctionModel = require('../models/auctionModel');
 const socketConfig = require('../config/socket');
-
+const ItemModel = require('../models/itemModel');
 
 const auctionController = {
     placeBid: async (req, res) => {
@@ -31,15 +31,23 @@ const auctionController = {
       },
 
       createAuction: async (req, res) => {
-        const { item_id, start_time, end_time, status, winner_id, final_price, type } = req.body;
+        const { seller_id, name, description, starting_price, image_url, start_time, end_time, type } = req.body;
+
         try {
-            const result = await AuctionModel.createAuction({ item_id, start_time, end_time, status, winner_id, final_price, type });
-            if(!result) return res.status(404).json({ error: 'Auction not created' });
-            res.status(200).json({ message: 'Auction created successfully!', auctionId: result });
+            //Create the item
+            const item_id = await ItemModel.createItem({ seller_id, name, description, starting_price, image_url });
+            if (!item_id) return res.status(500).json({ error: 'Item creation failed' });
+            // Create the auction
+            const auctionId = await AuctionModel.createAuction({ item_id, start_time, end_time, status: 'ongoing', winner_id: null, final_price: null, type });
+
+            if (!auctionId) return res.status(500).json({ error: 'Auction creation failed' });
+
+            res.status(201).json({ message: 'Auction created successfully!', auctionId, item_id });
         } catch (error) {
+            console.error('Error creating auction:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
-      },
+    },
 
       getAuction: async (req, res) => {
         const { auctionId } =  req.query

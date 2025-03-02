@@ -1,5 +1,4 @@
 const db = require('../config/database');
-
 const AuctionModel = {
   // Retrieve an auction by its ID.
   getAuctionById: async (auctionId) => {
