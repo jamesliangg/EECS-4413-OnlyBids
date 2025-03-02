@@ -21,7 +21,8 @@ const auctionController = {
           
           const io = socketConfig.getIO();
       
-          //Enter auction room
+          // Enter auction room
+          // https://socket.io/docs/v3/rooms/
           io.to(`auction_${auctionId}`).emit('newBid', { auctionId, userId, bidAmount });
           res.status(200).json({ message: 'Bid placed successfully!' });
         } catch (error) {
