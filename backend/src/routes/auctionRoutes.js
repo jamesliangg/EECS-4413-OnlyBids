@@ -14,4 +14,6 @@ router.get('/:auctionId', auctionController.getAuction);
 // Getting auctions from auctionId (GET)
 router.get('/auctions', auctionController.getAuctions);
 
+// Update auction (PUT)
+router.put('/update', auctionController.updateAuction);
 module.exports = router;

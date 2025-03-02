@@ -11,10 +11,10 @@ const AuctionModel = {
   },
 
   //Update Auction for top bidder
-  updateAuctionBid: async (auctionId, bidAmount, userId) => {
+  updateAuctionBid: async (auctionId, bidAmount, userId, status) => {
     const [result] = await db.query(
-      "UPDATE Auction SET final_price = ?, winner_id = ? WHERE auction_id = ?",
-      [bidAmount, userId, auctionId]
+      "UPDATE Auction SET final_price = ?, winner_id = ? WHERE auction_id = ?, status = ?",
+      [bidAmount, userId, auctionId, status]
     );
     return result; 
   },

@@ -4,7 +4,7 @@ const socketConfig = require('../config/socket');
 
 const auctionController = {
     placeBid: async (req, res) => {
-        const { auctionId, userId, bidAmount } = req.body;
+        const { auctionId, userId, bidAmount} = req.body;
         try {
          
           const auction = await AuctionModel.getAuctionById(auctionId);
@@ -17,7 +17,7 @@ const auctionController = {
           }
           
           // Update the auction bid.
-          await AuctionModel.updateAuctionBid(auctionId, bidAmount, userId);
+          await AuctionModel.updateAuctionBid(auctionId, bidAmount, userId, 'ongoing');
           
           const io = socketConfig.getIO();
       
@@ -58,6 +58,17 @@ const auctionController = {
             if(!result)  return res.status(404).json({ error: 'Auction not found' });
             res.status(200).json(result);
         } catch (error) {
+            res.status(500).json({ error: 'Internal server error' });
+        }
+      },
+
+      updateAuction: async(req, res) => {
+        const { auctionId, bidAmount, userId, status}  = req.body;
+
+        try {
+            await AuctionModel.updateAuctionBid(auctionId, bidAmount, userId, status);
+            res.status(200).json({ message: 'Auction updated successfully!'});
+        } catch(error) {
             res.status(500).json({ error: 'Internal server error' });
         }
       }

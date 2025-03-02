@@ -26,9 +26,6 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Something broke ):' })
 })
 
-// Used for mapping userId with socketID
-const socketMap = {}
-
 // Create HTTP server and initialize Socket.IO
 const server = http.createServer(app);
 const io = socketConfig.init(server);
