@@ -3,9 +3,9 @@ const router = express.Router();
 const searchController = require('../controllers/searchController');
 
 // Autocompletion (GET)
-router.get('/autocompetion', searchController.autocomplete);
+router.get('/autocompetion/:keyword', searchController.autocomplete);
 
 // Full search (GET)
-router.get('/fullsearch', searchController.fullSearch);
+router.get('/fullsearch/:keyword', searchController.fullSearch);
 
 module.exports = router;
