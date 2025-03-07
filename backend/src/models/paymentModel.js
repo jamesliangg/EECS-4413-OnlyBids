@@ -1,17 +1,16 @@
-const db = requre("../config/database");
+const db = require("../config/database");
 
 const PaymentModel = {
-  createPayment: async ({
-    auction_id,
-    buyer_id,
-    amount,
-    payment_status,
-    payment_date,
-  }) => {
+  createPayment: async (paymentData) => {
     try {
       const [paymentResult] = await db.query(
-        "INSERT INTO Payment (auction_id, buyer_id, amount, payment_status, payment_date VALUES (?, ?, ?, ?, ?)",
-        [auction_id, buyer_id, amount, payment_status, payment_date]
+        "INSERT INTO Payment (auction_id, buyer_id, amount, payment_status) VALUES (?, ?, ?, ?)",
+        [
+          paymentData.auction_id,
+          paymentData.buyer_id,
+          paymentData.amount,
+          paymentData.payment_status,
+        ]
       );
       return paymentResult;
     } catch (error) {

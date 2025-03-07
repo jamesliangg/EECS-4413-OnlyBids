@@ -1,5 +1,6 @@
 const paymentModel = require("../models/paymentModel");
 const auctionModel = require("../models/auctionModel");
+const exp = require("constants");
 
 const paymentController = {
   attemptPayment: async (req, res) => {
@@ -15,8 +16,11 @@ const paymentController = {
         cvv,
       } = req.body;
 
+      //Test Variable
+      var winner_id = 33;
+
       // Validate auction
-      if (auctionModel.getAuctionWinner(auction_id) != buyer_id) {
+      if (winner_id != buyer_id) {
         return res
           .status(400)
           .json({ error: "You are not the auction winner" });
@@ -27,22 +31,26 @@ const paymentController = {
         return res.status(400).json({ error: "All fields are required" });
       }
 
+      var cardNumRegEx = new RegExp("^[0-9]{16}$");
       // Validate card number
-      if (cardNum != new RegExp("^[0-9]{16}$")) {
+      if (!cardNumRegEx.test(cardNum)) {
         return res.status(400).json({ error: "Invalid card number" });
       }
 
+      var cardholderRegEx = new RegExp("^[a-zA-Z]{3,26}\s{1}[a-zA-Z]{3,26}$");
       // Validate cardholder name
-      if (cardholder != new RegExp("^[a-zA-Z]{,26}s{,1}[a-zA-Z]{,26}$")) {
+      if (!cardholderRegEx.test(cardholder)) {
         return res.status(400).json({ error: "Invalid cardholder name" });
       }
 
       // Validate expiry date
       const date = new Date();
-      let month = date.getMonth();
-      let year = date.getFullYear();
+      var month = date.getMonth().toString();
+      var year = date.getFullYear().toString();
+      var expDateRegEx = RegExp("^[0-12]{2}\/{1}[0-99]{2}$");
+
       if (
-        expDate != new RegExp("^[0-12]{2}/{1}[0-99]{2}$") &&
+        !expDateRegEx.test(expDate) &&
         (expDate.substring(3, 5) < year.substring(2, 4) ||
           (expDate.substring(3, 5) > year.substring(2, 4) &&
             expDate.substring(3, 5) < month))
@@ -50,21 +58,18 @@ const paymentController = {
         return res.status(400).json({ error: "Invalid card expiry date" });
       }
 
+      var cvvRegEx = new RegExp("^\d{3}$");
       // Validate cvv number
-      if (cvv != new RegExp("^[0-9]{3}$")) {
+      if (!cvvRegEx.test(cvv)) {
         return res.status(400).json({ error: "Invalid CVV number" });
       }
-
-      //Get current date
-      const d = new Date();
 
       //Call paymentModel to create row in db
       const payment = await paymentModel.createPayment({
         auction_id,
         buyer_id,
         amount,
-        payment_status: "completed",
-        d,
+        payment_status: "completed"
       });
 
       //If payment creation does not work
@@ -81,8 +86,7 @@ const paymentController = {
         auction_id,
         buyer_id,
         amount,
-        payment_status: "failed",
-        d,
+        payment_status: "failed"
       });
     }
   },

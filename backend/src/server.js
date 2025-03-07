@@ -2,6 +2,7 @@ const express = require('express')
 const userRoutes = require('./routes/userRoutes')
 const searchRoutes = require('./routes/searchRoutes')
 const auctionRoutes = require('./routes/auctionRoutes')
+const paymentRoutes = require('./routes/paymentRoutes')
 const socketConfig = require('./config/socket');
 const http = require('http');
 
@@ -20,7 +21,10 @@ app.use('/api', userRoutes)
 app.use('/api/search', searchRoutes)
 
 // Auction routes
-app.use('api/auction', auctionRoutes)
+app.use('/api/auction', auctionRoutes)
+
+// Payment routes
+app.use('/api/payment', paymentRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
