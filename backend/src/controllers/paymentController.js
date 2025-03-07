@@ -16,7 +16,7 @@ const paymentController = {
       } = req.body;
 
       // Validate auction
-      if (getAuctionWinner(auction_id) != buyer_id) {
+      if (auctionModel.getAuctionWinner(auction_id) != buyer_id) {
         return res
           .status(400)
           .json({ error: "You are not the auction winner" });
@@ -55,7 +55,10 @@ const paymentController = {
         return res.status(400).json({ error: "Invalid CVV number" });
       }
 
+      //Get current date
       const d = new Date();
+
+      //Call paymentModel to create row in db
       const payment = await paymentModel.createPayment({
         auction_id,
         buyer_id,
@@ -64,10 +67,12 @@ const paymentController = {
         d,
       });
 
+      //If payment creation does not work
       if (!payment) {
         return res.status(500).json({ error: "Payment failed" });
       }
 
+      //Successful payment
       res.status(201).json({ message: "Payment successful!" });
     } catch (error) {
       console.error("Payment error:", error);
