@@ -59,6 +59,15 @@ const AuctionModel = {
     );
     return result;
   },
+
+  // Update Dutch auction price
+  updateDutchAuctionPrice: async (auctionId, newPrice) => {
+    const [result] = await db.query(
+      "UPDATE Auction SET final_price = ? WHERE auction_id = ? AND type = 'dutch' AND status = 'ongoing'",
+      [newPrice, auctionId]
+    );
+    return result.affectedRows > 0;
+  },
 };
 
 module.exports = AuctionModel;

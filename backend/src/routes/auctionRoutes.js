@@ -16,4 +16,8 @@ router.get('/auctions', auctionController.getAuctions);
 
 // Update auction (PUT)
 router.put('/update', auctionController.updateAuction);
+
+// Update Dutch auction price (PUT)
+router.put('/dutch/price', auctionController.updateDutchPrice);
+
 module.exports = router;
