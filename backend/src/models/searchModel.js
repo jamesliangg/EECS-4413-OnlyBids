@@ -6,7 +6,7 @@ const SearchModel =  {
     findItemsAutocompletion: async (keyWord) => {
         const [result]  = await db.query(
             `SELECT name, image_url FROM Item WHERE name LIKE ? LIMIT 10`,
-            [keyWord]
+            [`%${keyWord}%`]
         );
         
         return result;
@@ -14,6 +14,7 @@ const SearchModel =  {
 
     // For search button
     findItemsFullSearch: async(keyWord) => {
+        const searchPattern = `%${keyWord}%`;
         const [result]  = await db.query(
         `SELECT 
             a.auction_id, 
@@ -31,7 +32,7 @@ const SearchModel =  {
         WHERE a.status = 'ongoing' 
         AND (i.name LIKE ? OR i.description LIKE ?)
         ORDER BY a.start_time DESC;`,
-        [keyWord]
+        [searchPattern, searchPattern]
         );
         
         return result;
