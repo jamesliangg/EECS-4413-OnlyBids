@@ -4,9 +4,12 @@ const exp = require("constants");
 
 const paymentController = {
   attemptPayment: async (req, res) => {
+    // Store request body data in local scope so it's available for error handling
+    let paymentData;
+    
     try {
       // Get the request body
-      const {
+      paymentData = {
         auction_id,
         buyer_id,
         amount,
@@ -81,13 +84,27 @@ const paymentController = {
       res.status(201).json({ message: "Payment successful!" });
     } catch (error) {
       console.error("Payment error:", error);
-      res.status(500).json({ error: "Internal server error" });
-      const payment = await paymentModel.createPayment({
-        auction_id,
-        buyer_id,
-        amount,
-        payment_status: "failed"
+      
+      // Send error response first
+      res.status(500).json({ 
+        error: "Payment processing error", 
+        details: error.sqlMessage || error.message 
       });
+
+      // Try to record the failed payment, but don't let it crash if it fails
+      try {
+        if (paymentData) {  // Only attempt if we have the payment data
+          await paymentModel.createPayment({
+            auction_id: paymentData.auction_id,
+            buyer_id: paymentData.buyer_id,
+            amount: paymentData.amount,
+            payment_status: "failed"
+          });
+        }
+      } catch (innerError) {
+        // Just log the error, don't crash
+        console.error("Failed to record failed payment:", innerError);
+      }
     }
   },
 };
