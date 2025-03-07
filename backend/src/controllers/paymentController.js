@@ -37,7 +37,7 @@ const paymentController = {
         return res.status(400).json({ error: "Invalid card number" });
       }
 
-      var cardholderRegEx = new RegExp("^[a-zA-Z]{3,26}\s{1}[a-zA-Z]{3,26}$");
+      var cardholderRegEx = new RegExp("^[a-zA-Z\\s]+$");
       // Validate cardholder name
       if (!cardholderRegEx.test(cardholder)) {
         return res.status(400).json({ error: "Invalid cardholder name" });
@@ -58,7 +58,7 @@ const paymentController = {
         return res.status(400).json({ error: "Invalid card expiry date" });
       }
 
-      var cvvRegEx = new RegExp("^\d{3}$");
+      var cvvRegEx = new RegExp("^[0-9]{3}$");
       // Validate cvv number
       if (!cvvRegEx.test(cvv)) {
         return res.status(400).json({ error: "Invalid CVV number" });
