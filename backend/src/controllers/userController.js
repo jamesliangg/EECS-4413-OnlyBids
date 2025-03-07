@@ -6,17 +6,26 @@ const userController = {
     signup: async (req, res) => {
         try {
             // Get the request body
-            const { email, password, username } = req.body;
+            const { email, password, username, street, city, state, postal_code, country } = req.body;
 
-            // Validate input
+            // Validate required fields
             if (!email || !password || !username) {
-                return res.status(400).json({ error: 'All fields are required' });
+                return res.status(400).json({ error: 'Email, password, and username are required' });
             }
 
             // Validate email format
-            // https://www.npmjs.com/package/validator
             if (!validator.isEmail(email)) {
                 return res.status(400).json({ error: 'Invalid email format' });
+            }
+
+            // Validate username length
+            if (username.length > 50) {
+                return res.status(400).json({ error: 'Username must be less than 50 characters' });
+            }
+
+            // Validate postal code if provided
+            if (postal_code && postal_code.length > 20) {
+                return res.status(400).json({ error: 'Postal code must be less than 20 characters' });
             }
 
             // Check if user already exists
@@ -26,14 +35,18 @@ const userController = {
             }
 
             // Hash password
-            // https://www.npmjs.com/package/bcryptjs
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Create user
+            // Create user with all fields
             const user = await UserModel.create({
                 email,
                 password: hashedPassword,
-                username
+                username,
+                street,
+                city,
+                state,
+                postal_code,
+                country
             });
 
             // Send a response with a 201 status code
