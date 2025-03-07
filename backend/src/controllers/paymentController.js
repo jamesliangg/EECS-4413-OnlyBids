@@ -1,4 +1,5 @@
 const paymentModel = require("../models/paymentModel");
+const auctionModel = require("../models/auctionModel");
 
 const paymentController = {
   attemptPayment: async (req, res) => {
@@ -7,7 +8,7 @@ const paymentController = {
       const {
         auction_id,
         buyer_id,
-        winning_id,
+        amount,
         cardNum,
         cardholder,
         expDate,
@@ -15,6 +16,11 @@ const paymentController = {
       } = req.body;
 
       // Validate auction
+      if (getAuctionWinner(auction_id) != buyer_id) {
+        return res
+          .status(400)
+          .json({ error: "You are not the auction winner" });
+      }
 
       // Validate input
       if (!cardNum || !cardholder || !expDate || !cvv) {
@@ -49,10 +55,30 @@ const paymentController = {
         return res.status(400).json({ error: "Invalid CVV number" });
       }
 
-      const payment = await paymentModel.createPayment({});
+      const d = new Date();
+      const payment = await paymentModel.createPayment({
+        auction_id,
+        buyer_id,
+        amount,
+        payment_status: "completed",
+        d,
+      });
+
+      if (!payment) {
+        return res.status(500).json({ error: "Payment failed" });
+      }
+
+      res.status(201).json({ message: "Payment successful!" });
     } catch (error) {
       console.error("Payment error:", error);
       res.status(500).json({ error: "Internal server error" });
+      const payment = await paymentModel.createPayment({
+        auction_id,
+        buyer_id,
+        amount,
+        payment_status: "failed",
+        d,
+      });
     }
   },
 };
