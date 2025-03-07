@@ -3,6 +3,8 @@ const userRoutes = require('./routes/userRoutes')
 const searchRoutes = require('./routes/searchRoutes')
 const auctionRoutes = require('./routes/auctionRoutes')
 const socketConfig = require('./config/socket');
+const http = require('http');
+
 require('dotenv').config()
 
 const app = express()
