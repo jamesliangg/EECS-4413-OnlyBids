@@ -61,6 +61,47 @@ const userController = {
             console.error('Signup error:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
+    },
+
+    signin: async (req, res) => {
+        try {
+            // Get the request body
+            const { email, password } = req.body;
+
+            // Validate required fields
+            if (!email || !password) {
+                return res.status(400).json({ error: 'Email and password are required' });
+            }
+
+            // Validate email format
+            if (!validator.isEmail(email)) {
+                return res.status(400).json({ error: 'Invalid email format' });
+            }
+
+            // Find user by email
+            const user = await UserModel.findByEmail(email);
+            if (!user) {
+                return res.status(401).json({ error: 'Invalid email or password' });
+            }
+
+            // Compare password with hashed password in database
+            const isValidPassword = await bcrypt.compare(password, user.password_hash);
+            if (!isValidPassword) {
+                return res.status(401).json({ error: 'Invalid email or password' });
+            }
+
+            // Send success response with user data (excluding password)
+            const { password_hash, ...userData } = user;
+            res.status(200).json({
+                message: 'Sign in successful',
+                user: userData
+            });
+
+        } catch (error) {
+            // Error handling
+            console.error('Signin error:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 };
 
