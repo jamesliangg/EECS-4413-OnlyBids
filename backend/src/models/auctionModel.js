@@ -71,9 +71,17 @@ const AuctionModel = {
 
   // Accept current Dutch auction price
   acceptDutchAuctionPrice: async (auctionId, userId) => {
+    // First get the auction to check prices
+    const [auction] = await db.query(
+      "SELECT i.starting_price, a.final_price FROM Auction a JOIN Item i ON a.item_id = i.item_id WHERE a.auction_id = ?",
+      [auctionId]
+    );
+
+    const priceToUse = auction[0].final_price || auction[0].starting_price;
+
     const [result] = await db.query(
-      "UPDATE Auction SET status = 'completed', winner_id = ? WHERE auction_id = ? AND type = 'dutch' AND status = 'ongoing'",
-      [userId, auctionId]
+      "UPDATE Auction SET status = 'completed', winner_id = ?, final_price = ? WHERE auction_id = ? AND type = 'dutch' AND status = 'ongoing'",
+      [userId, priceToUse, auctionId]
     );
     return result.affectedRows > 0;
   },

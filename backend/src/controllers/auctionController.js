@@ -153,19 +153,22 @@ const auctionController = {
                 return res.status(400).json({ error: 'Failed to accept Dutch auction price' });
             }
 
+            // Get the updated auction to get the final price
+            const updatedAuction = await AuctionModel.getAuctionById(auctionId);
+
             // Notify all clients in the auction room
             const io = socketConfig.getIO();
             io.to(`auction_${auctionId}`).emit('auctionEnded', { 
                 auctionId, 
                 winner: userId,
-                finalPrice: auction.final_price,
+                finalPrice: updatedAuction.final_price,
                 message: 'Dutch auction ended - Current price accepted'
             });
 
             res.status(200).json({ 
                 message: 'Dutch auction price accepted successfully',
                 auctionId,
-                finalPrice: auction.final_price
+                finalPrice: updatedAuction.final_price
             });
         } catch (error) {
             console.error('Error accepting Dutch auction price:', error);
