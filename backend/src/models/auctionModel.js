@@ -68,6 +68,15 @@ const AuctionModel = {
     );
     return result.affectedRows > 0;
   },
+
+  // Accept current Dutch auction price
+  acceptDutchAuctionPrice: async (auctionId, userId) => {
+    const [result] = await db.query(
+      "UPDATE Auction SET status = 'completed', winner_id = ? WHERE auction_id = ? AND type = 'dutch' AND status = 'ongoing'",
+      [userId, auctionId]
+    );
+    return result.affectedRows > 0;
+  },
 };
 
 module.exports = AuctionModel;

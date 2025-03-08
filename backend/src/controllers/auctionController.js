@@ -130,6 +130,47 @@ const auctionController = {
             console.error('Error updating Dutch auction price:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
+    },
+
+    acceptDutchPrice: async (req, res) => {
+        const { auctionId, userId } = req.body;
+        try {
+            // Get auction to verify it's a Dutch auction
+            const auction = await AuctionModel.getAuctionById(auctionId);
+            if (!auction) {
+                return res.status(404).json({ error: 'Auction not found' });
+            }
+            if (auction.type !== 'dutch') {
+                return res.status(400).json({ error: 'This is not a Dutch auction' });
+            }
+            if (auction.status !== 'ongoing') {
+                return res.status(400).json({ error: 'Auction is not ongoing' });
+            }
+
+            // Accept the current price
+            const success = await AuctionModel.acceptDutchAuctionPrice(auctionId, userId);
+            if (!success) {
+                return res.status(400).json({ error: 'Failed to accept Dutch auction price' });
+            }
+
+            // Notify all clients in the auction room
+            const io = socketConfig.getIO();
+            io.to(`auction_${auctionId}`).emit('auctionEnded', { 
+                auctionId, 
+                winner: userId,
+                finalPrice: auction.final_price,
+                message: 'Dutch auction ended - Current price accepted'
+            });
+
+            res.status(200).json({ 
+                message: 'Dutch auction price accepted successfully',
+                auctionId,
+                finalPrice: auction.final_price
+            });
+        } catch (error) {
+            console.error('Error accepting Dutch auction price:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 }
 

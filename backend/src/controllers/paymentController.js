@@ -19,11 +19,11 @@ const paymentController = {
         cvv,
       } = req.body;
 
-      //Test Variable
-      var winner_id = 33;
+      // //Test Variable
+      // var winner_id = 33;
 
       // Validate auction
-      if (winner_id != buyer_id) {
+      if (auctionModel.getAuctionWinner(auction_id) != buyer_id) {
         return res
           .status(400)
           .json({ error: "You are not the auction winner" });

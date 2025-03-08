@@ -8,10 +8,7 @@ router.post('/bid', auctionController.placeBid);
 // Creating auction (POST)
 router.post('/create', auctionController.createAuction);
 
-// Getting auction from auctionId (GET)
-router.get('/:auctionId', auctionController.getAuction);
-
-// Getting auctions from auctionId (GET)
+// Getting auctions (GET)
 router.get('/auctions', auctionController.getAuctions);
 
 // Update auction (PUT)
@@ -19,5 +16,11 @@ router.put('/update', auctionController.updateAuction);
 
 // Update Dutch auction price (PUT)
 router.put('/dutch/price', auctionController.updateDutchPrice);
+
+// Accept current Dutch auction price (POST)
+router.post('/dutch/accept', auctionController.acceptDutchPrice);
+
+// Getting specific auction by ID (GET) - Move this to the end
+router.get('/:auctionId', auctionController.getAuction);
 
 module.exports = router;
