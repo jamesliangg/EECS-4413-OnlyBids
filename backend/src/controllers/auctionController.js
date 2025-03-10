@@ -64,7 +64,6 @@ const auctionController = {
       getAuctions: async (req, res) => {
         try {
             const result = await AuctionModel.getActiveAuctions();
-            if(!result)  return res.status(404).json({ error: 'Auction not found' });
             res.status(200).json(result);
         } catch (error) {
             res.status(500).json({ error: 'Internal server error' });
@@ -78,7 +77,7 @@ const auctionController = {
             await AuctionModel.updateAuctionBid(auctionId, bidAmount, userId, status);
             res.status(200).json({ message: 'Auction updated successfully!'});
         } catch(error) {
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({ error });
         }
       },
 
