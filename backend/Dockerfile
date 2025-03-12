@@ -7,4 +7,8 @@ ENV MYSQL_USER=mysql_user
 ENV MYSQL_PASSWORD=mysql_user_password
 
 # https://hub.docker.com/_/mysql
-COPY ./init.sql /docker-entrypoint-initdb.d/ 
+COPY init.sql /docker-entrypoint-initdb.d/01-init.sql
+COPY seed.sql /docker-entrypoint-initdb.d/02-seed.sql
+
+# Set permissions
+RUN chmod 644 /docker-entrypoint-initdb.d/*.sql 

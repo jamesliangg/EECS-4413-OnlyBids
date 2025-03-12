@@ -12,8 +12,13 @@ services:
       MYSQL_DATABASE: onlybids_database
       MYSQL_USER: mysql_user
       MYSQL_PASSWORD: mysql_user_password
-    volumes:
-      - mysql_data:/var/lib/mysql
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "mysql_user", "--password=mysql_user_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Node.js service
   app:
@@ -24,7 +29,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       - DB_HOST=mysql_db
       - DB_USER=mysql_user
