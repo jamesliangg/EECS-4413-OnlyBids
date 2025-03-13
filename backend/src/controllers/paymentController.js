@@ -6,13 +6,13 @@ const paymentController = {
   attemptPayment: async (req, res) => {
     // Store request body data in local scope so it's available for error handling
     let paymentData;
-    
+
     try {
       // Get the request body
       paymentData = {
         auction_id,
         buyer_id,
-        amount,
+        isExpedited,
         cardNum,
         cardholder,
         expDate,
@@ -27,7 +27,9 @@ const paymentController = {
 
       // Check if the buyer is the winner
       if (auction.winner_id != buyer_id) {
-        return res.status(400).json({ error: "You are not the auction winner" });
+        return res
+          .status(400)
+          .json({ error: "You are not the auction winner" });
       }
 
       // Validate input
@@ -51,7 +53,7 @@ const paymentController = {
       const date = new Date();
       var month = date.getMonth().toString();
       var year = date.getFullYear().toString();
-      var expDateRegEx = RegExp("^[0-12]{2}\/{1}[0-99]{2}$");
+      var expDateRegEx = RegExp("^[0-12]{2}/{1}[0-99]{2}$");
 
       if (
         !expDateRegEx.test(expDate) &&
@@ -68,12 +70,23 @@ const paymentController = {
         return res.status(400).json({ error: "Invalid CVV number" });
       }
 
+      var total;
+      if (isExpedited == true) {
+        total =
+          parseFloat(auction.final_price) +
+          parseFloat(auction.shipping_price) +
+          parseFloat(auction.expedited_price);
+      } else {
+        total =
+          parseFloat(auction.final_price) + parseFloat(auction.shipping_price);
+      }
+
       //Call paymentModel to create row in db
       const payment = await paymentModel.createPayment({
         auction_id,
         buyer_id,
-        amount,
-        payment_status: "completed"
+        amount: total,
+        payment_status: "completed",
       });
 
       //If payment creation does not work
@@ -85,21 +98,22 @@ const paymentController = {
       res.status(201).json({ message: "Payment successful!" });
     } catch (error) {
       console.error("Payment error:", error);
-      
+
       // Send error response first
-      res.status(500).json({ 
-        error: "Payment processing error", 
-        details: error.sqlMessage || error.message 
+      res.status(500).json({
+        error: "Payment processing error",
+        details: error.sqlMessage || error.message,
       });
 
       // Try to record the failed payment, but don't let it crash if it fails
       try {
-        if (paymentData) {  // Only attempt if we have the payment data
+        if (paymentData) {
+          // Only attempt if we have the payment data
           await paymentModel.createPayment({
             auction_id: paymentData.auction_id,
             buyer_id: paymentData.buyer_id,
-            amount: paymentData.amount,
-            payment_status: "failed"
+            amount: total,
+            payment_status: "failed",
           });
         }
       } catch (innerError) {
