@@ -18,6 +18,15 @@ const AuctionModel = {
     return result;
   },
 
+  //Update Auction status for buyer
+  updateAuctionStatus: async (auctionId, status) => {
+    const [result] = await db.query(
+      "UPDATE Auction SET status = ? WHERE auction_id = ?",
+      [status, auctionId]
+    );
+    return result;
+  },
+
   // Create a new auction record.
   createAuction: async (auctionData) => {
     const {
@@ -49,6 +58,12 @@ const AuctionModel = {
     const [result] = await db.query(
       "SELECT * FROM Auction WHERE status = 'ongoing'"
     );
+    return result;
+  },
+
+  // Get all active (ongoing) auctions.
+  getAllAuctions: async () => {
+    const [result] = await db.query("SELECT * FROM Auction");
     return result;
   },
 
