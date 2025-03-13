@@ -51,7 +51,7 @@ This is a **React-based** frontend client demo for the OnlyBids. Also implemente
 ## Configuration Steps
 1. Clone the repository to local.
   ```shell
-  git clone https://github.com/YourUsername/onlybids-frontend.git
+  git clone https://github.com/jamesliangg/EECS-4413-OnlyBids.git
   cd onlybids-frontend
   ```
 2. Install dependencies.
