@@ -3,16 +3,15 @@ This is a **React-based** frontend client demo for the OnlyBids. Also implemente
 
 ## Components 
 1. Home (/)
-- Simple page with minimal text.
-- Navigation bar on top (Home on left, Catalogue/Sell Item on right).
+- Homepage, of course.
+- Navigation bar on top.
 
 2. Sign In (/signin)
-- Digit-only inputs not required here, just normal username/password.
-- After sign-in, typically navigate to /catalogue.
+- Normal username/password.
 
 3. Sign Up (/signup)
 - Creates a new user.
-- Doesn’t ask for AuctionID or BuyerID (the server identifies the user post-sign-up).
+- Collect all the information needed.
   
 4. Forgot Password (/forgot-password)
 - Requests user’s email, fetches a security question if it exists, and resets password.
@@ -23,32 +22,27 @@ This is a **React-based** frontend client demo for the OnlyBids. Also implemente
 
 6. Forward Bidding (/forward-bidding)
 - Connects to Socket.IO to show the highest bid in real time.
-- Typically expects the user to specify an AuctionID, or you might pass it via query params.
+- Expects the user to offer an AuctionID, or you might pass it via query params.
 
 7. Dutch Bidding (/dutch-bidding)
 - Connects to Socket.IO to see the current Dutch auction price in real time.
-- “Buy Now” logic calls a route to accept the price.
+- Calls a route to accept the price.
 
 8. Update Dutch (/update-dutch)
-- For sellers. Allows them to lower the Dutch price in real time.
-- Listens for "dutchPriceUpdate" events so the current price is always displayed.
+- Allows sellers to lower the Dutch price in real time.
+- Listens to "dutchPriceUpdate" events so the current price is always displayed.
 
-9. Auction Ended (/auction-ended/:auctionId or a variant)
-- Fetches final bid, winning bidder from the server.
-- If user is not the winner, shows “Failure Notice.”
-- If user is the winner, user can select shipping type (regular/expedited) and confirm, typically navigating to Payment.
+9. Auction Ended (/auction-ended?={$auctionId})
+- Get final bid, winning bidder from the server.
+- If user is not the winner, shows “failure notice.
+- If user is the winner, user can select shipping type (regular/expedited) before submitting.
 
 10. Payment (/payment)
-- Doesn’t ask for AuctionID or BuyerID; gets them from query params or session.
-- Default shipping address is 4700 Keele St, North York, ON M3J 1P3.
 - Card number, MM/YY, CVV, and phone number only allow digits.
-- Auto-jump from MM to YY after 2 digits.
-- On submission, calls /api/payment/pay.
+- Automatically jump from MM to YY after user input 2 digits.
 
 11. Receipt (/receipt)
 - Final page showing amount and estimated shipping days from the database.
-- Usually fetched from the server once payment is successful.
-- Demonstration Steps
   
 ## Prerequisites
 1. Node.js (v16+)
@@ -72,15 +66,15 @@ This is a **React-based** frontend client demo for the OnlyBids. Also implemente
 
 ## Demonstration Steps
 1. Run the front end (npm run dev), Open the front end in your browser, typically http://localhost:5173.
-2. Click Sign Up/Sign In button shown on the homepage.
-3. Click the "catalogue" to visit (/catalogue).
-4. Visit /forward-bidding, /dutch-bidding to browse the pages of foward bidding and dutch bidding correspondingly.
-5. Input /auction-ended?=12233 to see the successful page. (you are the winning bidder).
-6. Input /auction-ended?=65535 or any other numbers to see the fail page. (you lost the auction)
+2. Click **Sign Up/Sign In** button shown on the homepage.
+3. Click the **"catalogue"** in the navigation bar to visit **/catalogue**.
+4. Visit **/forward-bidding**, **/dutch-bidding** to browse the pages of foward bidding and dutch bidding correspondingly.
+5. Input **/auction-ended?=12233** to see the successful page. (you are the winning bidder).
+6. Input **/auction-ended?=65535** or any other numbers to see the fail page. (you lost the auction)
 7. Choose shipping method if you’re the winner.
-8. Proceed to /payment to enter all the information, try to input non-digit characters in every input area.
+8. Proceed to **/payment** to enter all the information, try to input non-digit characters in every input area.
 9. Enter all the information correctly, then click the button.
-10. Check the final receipt at /receipt.
+10. Check the final receipt at **/receipt**.
 
 # Directory Structure
 ```
