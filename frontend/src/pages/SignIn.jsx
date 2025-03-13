@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 
 function SignIn() {
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const navigate = useNavigate()
@@ -11,10 +11,10 @@ function SignIn() {
     e.preventDefault()
     setError("")
 
-    fetch("/api/signin", {
+    fetch("http://localhost:3000/api/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     })
       .then((res) => {
         if (!res.ok) throw new Error("Sign In failed!")
@@ -26,7 +26,7 @@ function SignIn() {
       })
       .catch((err) => {
         console.error(err)
-        setError("Invalid username or password.")
+        setError("Invalid email or password.")
       })
   }
 
@@ -37,12 +37,12 @@ function SignIn() {
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-1">Username</label>
+            <label className="block mb-1">Email</label>
             <input
               className="border p-2 w-full rounded"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
