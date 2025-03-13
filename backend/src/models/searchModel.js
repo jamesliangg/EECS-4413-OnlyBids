@@ -36,6 +36,34 @@ const SearchModel =  {
         );
         
         return result;
+    },
+
+    findItemByAuctionId: async(auctionID) => {
+        const [result]  = await db.query(
+                `SELECT 
+                    i.item_id,
+                    i.seller_id,
+                    i.name,
+                    i.description,
+                    i.starting_price,
+                    i.image_url,
+                    i.created_at AS item_created_at,
+                    a.auction_id,
+                    a.start_time,
+                    a.end_time,
+                    a.status,
+                    a.type,
+                    a.winner_id,
+                    a.final_price
+                FROM 
+                    Auction AS a
+                JOIN 
+                    Item AS i ON a.item_id = i.item_id
+                WHERE 
+                    a.auction_id = ?;`,
+            [auctionID]
+            );
+            return result;
     }
 
 }
