@@ -6,6 +6,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const socketConfig = require("./config/socket");
 const http = require("http");
 const cors = require("cors");
+const requestLogger = require("./middleware/requestLogger");
 
 require("dotenv").config();
 
@@ -17,6 +18,9 @@ app.use(cors());
 // Middleware to parse JSON bodies
 // https://expressjs.com/en/api.html#express.json
 app.use(express.json());
+
+// Request logger middleware
+app.use(requestLogger);
 
 // User routes
 app.use("/api", userRoutes);
