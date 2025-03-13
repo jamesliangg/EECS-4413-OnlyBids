@@ -51,6 +51,22 @@ const searchController = {
             console.error(error);
             res.status(500).json({ error: 'Server error' });
         }
+    },
+
+    fullSearchByAuctionId: async(req, res) => {
+        try {
+            const { auctionId } = req.params;
+
+            if (!auctionId) {
+                return res.status(400).json({ error: 'AuctionId is required' });
+            }
+
+            const results = await SearchModel.findItemByAuctionId(auctionId);
+            res.json(results);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Server error' });
+        }
     }
 };
 

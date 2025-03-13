@@ -35,6 +35,8 @@ CREATE TABLE Auction (
     type ENUM('forward', 'dutch') DEFAULT 'forward',
     winner_id INT NULL,
     final_price DECIMAL(10,2) NULL,
+    shipping_price DECIMAL(10,2) DEFAULT 8.00,
+    expedited_price DECIMAL(10,2) DEFAULT 10.00,
     FOREIGN KEY (item_id) REFERENCES Item(item_id) ON DELETE CASCADE,
     FOREIGN KEY (winner_id) REFERENCES User(user_id) ON DELETE SET NULL
 );
