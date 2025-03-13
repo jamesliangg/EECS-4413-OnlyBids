@@ -25,11 +25,11 @@ const userController = {
     signup: async (req, res) => {
         try {
             // Get the request body
-            const { email, password, username, street, city, state, postal_code, country } = req.body;
+            const { email, password, username, security_question, security_answer, street, city, state, postal_code, country } = req.body;
 
             // Validate required fields
-            if (!email || !password || !username) {
-                return res.status(400).json({ error: 'Email, password, and username are required' });
+            if (!email || !password || !username || !security_question || !security_answer) {
+                return res.status(400).json({ error: 'Email, password, username, security question, and security answer are required' });
             }
 
             // Validate email format
@@ -53,6 +53,15 @@ const userController = {
                 return res.status(400).json({ error: passwordCheck.reason });
             }
 
+            // Validate security question and answer
+            if (security_question.trim() === '') {
+                return res.status(400).json({ error: 'Security question cannot be empty' });
+            }
+
+            if (security_answer.trim() === '') {
+                return res.status(400).json({ error: 'Security answer cannot be empty' });
+            }
+
             // Validate postal code if provided
             if (postal_code && postal_code.length > 20) {
                 return res.status(400).json({ error: 'Postal code must be less than 20 characters' });
@@ -66,12 +75,17 @@ const userController = {
 
             // Hash password
             const hashedPassword = await bcrypt.hash(password, 10);
+            
+            // Hash security answer (for better security)
+            const hashedSecurityAnswer = await bcrypt.hash(security_answer, 10);
 
             // Create user with all fields
             const user = await UserModel.create({
                 email,
                 password: hashedPassword,
                 username,
+                security_question,
+                security_answer: hashedSecurityAnswer,
                 street,
                 city,
                 state,
@@ -127,7 +141,7 @@ const userController = {
             }
 
             // Send success response with user data (excluding password)
-            const { password_hash, ...userData } = user;
+            const { password_hash, security_answer, ...userData } = user;
             res.status(200).json({
                 message: 'Sign in successful',
                 user: userData
@@ -136,6 +150,93 @@ const userController = {
         } catch (error) {
             // Error handling
             console.error('Signin error:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
+
+    // Request password reset using security question
+    // Possibly disable this endpoint as reveals if email is registered or not
+    requestReset: async (req, res) => {
+        try {
+            const { email } = req.body;
+
+            // Validate required fields
+            if (!email) {
+                return res.status(400).json({ error: 'Email is required' });
+            }
+
+            // Validate email format
+            if (!validator.isEmail(email)) {
+                return res.status(400).json({ error: 'Invalid email format' });
+            }
+
+            // Find user by email
+            const user = await UserModel.findByEmail(email);
+            if (!user) {
+                // Possibly disable this endpoint as reveals if email is registered or not
+                return res.status(200).json({ 
+                    message: 'If your email is registered, you will receive the security question'
+                });
+            }
+
+            // Return the security question
+            res.status(200).json({
+                message: 'Security question retrieved',
+                security_question: user.security_question
+            });
+
+        } catch (error) {
+            console.error('Request reset error:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
+
+    // Reset password using security answer
+    resetPassword: async (req, res) => {
+        try {
+            const { email, security_answer, new_password } = req.body;
+
+            // Validate required fields
+            if (!email || !security_answer || !new_password) {
+                return res.status(400).json({ error: 'Email, security answer, and new password are required' });
+            }
+
+            // Validate email format
+            if (!validator.isEmail(email)) {
+                return res.status(400).json({ error: 'Invalid email format' });
+            }
+
+            // Validate new password format
+            const passwordCheck = isValidPassword(new_password);
+            if (!passwordCheck.valid) {
+                return res.status(400).json({ error: passwordCheck.reason });
+            }
+
+            // Find user by email
+            const user = await UserModel.findByEmail(email);
+            if (!user) {
+                // For security reasons, don't reveal that the email doesn't exist
+                return res.status(401).json({ error: 'Invalid email or security answer' });
+            }
+
+            // Verify security answer
+            const isValidAnswer = await bcrypt.compare(security_answer, user.security_answer);
+            if (!isValidAnswer) {
+                return res.status(401).json({ error: 'Invalid email or security answer' });
+            }
+
+            // Hash new password
+            const hashedPassword = await bcrypt.hash(new_password, 10);
+
+            // Update user's password
+            await UserModel.updatePassword(user.user_id, hashedPassword);
+
+            res.status(200).json({
+                message: 'Password reset successful'
+            });
+
+        } catch (error) {
+            console.error('Reset password error:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     }
