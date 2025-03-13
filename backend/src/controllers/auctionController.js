@@ -85,6 +85,11 @@ const auctionController = {
         const { auctionId, newPrice } = req.body;
 
         try {
+            // Validate that newPrice is greater than 0
+            if (newPrice <= 0) {
+                return res.status(400).json({ error: 'Price must be greater than 0' });
+            }
+            
             // Get auction to verify it's a Dutch auction
             const auction = await AuctionModel.getAuctionById(auctionId);
             if (!auction) {

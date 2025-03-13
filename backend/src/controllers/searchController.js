@@ -1,5 +1,13 @@
 const SearchModel = require('../models/searchModel');
 
+// Validates that a search keyword only contains alphanumeric and special characters
+const isValidSearchKeyword = (keyword) => {
+    // Allow alphanumeric characters and common special characters for search
+    const validKeywordRegex = /^[A-Za-z0-9!@#$%^&*()]+$/;
+    
+    return validKeywordRegex.test(keyword);
+};
+
 const searchController = {
     // Autocomplete search
     autocomplete: async (req, res) => {
@@ -8,6 +16,11 @@ const searchController = {
 
             if (!keyword) {
                 return res.status(400).json({ error: 'Keyword is required' });
+            }
+
+            // Validate keyword format
+            if (!isValidSearchKeyword(keyword)) {
+                return res.status(400).json({ error: 'Search keyword contains invalid characters' });
             }
 
             const results = await SearchModel.findItemsAutocompletion(keyword);
@@ -25,6 +38,11 @@ const searchController = {
 
             if (!keyword) {
                 return res.status(400).json({ error: 'Keyword is required' });
+            }
+
+            // Validate keyword format
+            if (!isValidSearchKeyword(keyword)) {
+                return res.status(400).json({ error: 'Search keyword contains invalid characters' });
             }
 
             const results = await SearchModel.findItemsFullSearch(keyword);
