@@ -33,21 +33,23 @@ docker-compose logs
 
 # Sample Data
 ## Generating Init Data
-To generate password hashes, go to the `backend/generateHash.js` file and update the `password` variable.
+To generate password/security answer hashes, go to the `backend/generateHash.js` file and update the `password` variable.
 Then run
 ```
 node scripts/generateHash.js
 ```
 Hashed password will be logged to console. You can then add it to the `seed.sql` file.
 
-## Sample Email and Passwords
+## Sample Email, Passwords, Security Answer
 ```
-john@example.com:excellentPassword1
-jane@example.com:excellentPassword2
-bob@example.com:excellentPassword3
-alice@example.com:excellentPassword4
-charlie@example.com:excellentPassword5
+john@example.com:excellentPassword1:Atlantis
+jane@example.com:excellentPassword2:Gotham
+bob@example.com:excellentPassword3:Tatooine
+alice@example.com:excellentPassword4:Neverland
+charlie@example.com:excellentPassword5:Lassonde
 ```
+
+
 
 # Folder Structure
 TB completed

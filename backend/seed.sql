@@ -12,12 +12,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- Insert sample users
 -- https://www.mockaroo.com/
-INSERT INTO User (username, email, password_hash, street, city, state, postal_code, country) VALUES
-('john_doe', 'john@example.com', '$2b$10$0f2klm.jZUWGKSbyxZrUZ.L5KdVz6s1fho7PAxyO5VuZgHVpiH7zC', '1 Stone Corner Court', 'Toronto', 'Ontario', 'M5V 2T6', 'Canada'),
-('jane_smith', 'jane@example.com', '$2b$10$7tAEVR2oOCo8PeEncVZ1sOmTsB3BJi566Wfhav46Q5mREpDTJhJ32', '69 Graedel Parkway', 'Vancouver', 'British Columbia', 'V6B 3K9', 'Canada'),
-('bob_wilson', 'bob@example.com', '$2b$10$9smdHjBe4fJfx5jieX3OTeTPLceTFUbs1EZL1CZ702j72Whg1i782', '2 Doe Crossing Circle', 'Montreal', 'Quebec', 'H3B 2Y5', 'Canada'),
-('alice_brown', 'alice@example.com', '$2b$10$e9GxROq90mUjsDqaRX7P2uSdGjx4spvhPdYucWYB/CIxv.nxVD7qm', '926 Harbort Plaza', 'Calgary', 'Alberta', 'T2P 4J8', 'Canada'),
-('charlie_green', 'charlie@example.com', '$2b$10$/t465p8340HhaT8hSZrXq.0ioJ6f37XcTsoKV.uoML.Bp4s9osULe', '3 Atwood Parkway', 'Ottawa', 'Ontario', 'K1P 5G3', 'Canada');
+INSERT INTO User (username, email, password_hash, security_question, security_answer, street, city, state, postal_code, country) VALUES
+('john_doe', 'john@example.com', '$2b$10$0f2klm.jZUWGKSbyxZrUZ.L5KdVz6s1fho7PAxyO5VuZgHVpiH7zC', 'In what city did your parents meet?', '$2b$10$EponL4ew/Zz6DecM7euxYOOPc01gZSZdILM95IkcfAt/9GH7EoCGm', '1 Stone Corner Court', 'Toronto', 'Ontario', 'M5V 2T6', 'Canada'),
+('jane_smith', 'jane@example.com', '$2b$10$7tAEVR2oOCo8PeEncVZ1sOmTsB3BJi566Wfhav46Q5mREpDTJhJ32', 'In what city did your parents meet?', '$2b$10$8NjIyZX5lTsgPfRKhoEbweur90bA3IRtbxETjzhZPDATA43d71z1K', '69 Graedel Parkway', 'Vancouver', 'British Columbia', 'V6B 3K9', 'Canada'),
+('bob_wilson', 'bob@example.com', '$2b$10$9smdHjBe4fJfx5jieX3OTeTPLceTFUbs1EZL1CZ702j72Whg1i782', 'In what city did your parents meet?', '$2b$10$gJFUc6YFHvGz0aBzvYv.veK1Y08iBtn1H.l.kGR7SvMGyW4kOmUaC', '2 Doe Crossing Circle', 'Montreal', 'Quebec', 'H3B 2Y5', 'Canada'),
+('alice_brown', 'alice@example.com', '$2b$10$e9GxROq90mUjsDqaRX7P2uSdGjx4spvhPdYucWYB/CIxv.nxVD7qm', 'In what city did your parents meet?', '$2b$10$M9kcw90O3lvkNhmTUPXX5enDZYM9UcJESgZvV3JmRWiyRJkuoQQli', '926 Harbort Plaza', 'Calgary', 'Alberta', 'T2P 4J8', 'Canada'),
+('charlie_green', 'charlie@example.com', '$2b$10$/t465p8340HhaT8hSZrXq.0ioJ6f37XcTsoKV.uoML.Bp4s9osULe', 'In what city did your parents meet?', '$2b$10$MsCuHXB337OtDl6Er06NUOBl0zC0AFtiUm0NsPN5QSDTxu1Crsc5C', '3 Atwood Parkway', 'Ottawa', 'Ontario', 'K1P 5G3', 'Canada');
 
 -- Insert items for auctions
 INSERT INTO Item (seller_id, name, description, starting_price, image_url) VALUES

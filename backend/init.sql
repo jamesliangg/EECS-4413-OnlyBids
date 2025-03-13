@@ -5,6 +5,8 @@ CREATE TABLE User (
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    security_question VARCHAR(255) NOT NULL,
+    security_answer VARCHAR(255) NOT NULL,
     street VARCHAR(100),
     city VARCHAR(50),
     state VARCHAR(50),
