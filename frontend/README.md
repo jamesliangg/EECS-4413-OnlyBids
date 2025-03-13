@@ -61,13 +61,13 @@ This is a **React-based** frontend client demo for the OnlyBids. Also implemente
   cd onlybids-frontend
   ```
 2. Install dependencies.
-   ```shell
+  ```shell
    npm install
-   ```
+  ```
 3. Start the development server.
-   ```shell
+  ```shell
    npm run dev
-   ```
+  ```
 4. Past the URL printed in the console, and open it in your browser.
 
 ## Demonstration Steps
