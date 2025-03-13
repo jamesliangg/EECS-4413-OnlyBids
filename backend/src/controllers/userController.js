@@ -18,6 +18,11 @@ const userController = {
                 return res.status(400).json({ error: 'Invalid email format' });
             }
 
+            // Validate username is alphanumeric
+            if (!validator.isAlphanumeric(username)) {
+                return res.status(400).json({ error: 'Username must contain only letters and numbers' });
+            }
+
             // Validate username length
             if (username.length > 50) {
                 return res.status(400).json({ error: 'Username must be less than 50 characters' });
