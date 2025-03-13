@@ -54,7 +54,7 @@ charlie@example.com:excellentPassword5:Lassonde
 ├── src/                        # Main source code
 │   ├── config/                 # Configuration files for database and websockets
 │   ├── controllers/            # Business logic for requests
-│   ├── middleware/             # Express middleware (auth, errors) - currently unused
+│   ├── middleware/             # Express middleware (logging)
 │   ├── models/                 # Database models and SQL commands
 │   ├── routes/                 # API endpoints
 │   ├── utils/                  # Unused
