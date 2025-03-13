@@ -89,6 +89,12 @@ const paymentController = {
         payment_status: "completed",
       });
 
+      //Call auction to update auction status
+      const auctionStatus = await auctionModel.updateAuctionStatus(
+        auction_id,
+        "completed"
+      );
+
       //If payment creation does not work
       if (!payment) {
         return res.status(500).json({ error: "Payment failed" });
