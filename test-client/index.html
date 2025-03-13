@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dutch Auction Test</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <style>
+        #log {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>Dutch Auction Test</h2>
+    
+    <input type="number" id="auctionId" value="1">
+    <!-- Button to join an auction -->
+    <button onclick="joinAuction()">Join Auction</button>
+    <br><br>
+    <!-- Create a div to display the log -->
+    <div id="log"></div>
+
+    <script>
+        const socket = io('http://localhost:3000');
+        const log = document.getElementById('log');
+
+        function addLog(msg) {
+            log.innerHTML += `<div>${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        // https://socket.io/docs/v4/client-api/
+        // 
+        socket.on('connect', () => addLog('Connected'));
+        socket.on('disconnect', () => addLog('Disconnected'));
+        socket.on('joinedAuction', (data) => addLog(`Joined auction room: ${data.roomName}`));
+        socket.on('dutchPriceUpdate', (data) => addLog(`Price updated: ${data.newPrice}`));
+
+        function joinAuction() {
+            const id = document.getElementById('auctionId').value;
+            // https://socket.io/docs/v4/client-api/
+            // https://socket.io/docs/v3/rooms/
+            socket.emit('joinAuction', parseInt(id));
+        }
+    </script>
+</body>
+</html> 
