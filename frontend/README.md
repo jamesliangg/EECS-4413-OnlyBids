@@ -68,7 +68,7 @@ This is a **React-based** frontend client demo for the OnlyBids. Also implemente
   ```shell
    npm run dev
   ```
-4. Past the URL printed in the console, and open it in your browser.
+4. Paste the URL printed in the console, and open it in your browser.
 
 ## Demonstration Steps
 1. Run the front end (npm run dev), Open the front end in your browser, typically http://localhost:5173.
