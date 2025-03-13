@@ -11,6 +11,11 @@ const auctionController = {
           if (!auction) return res.status(404).json({ error: 'Auction not found' });
           if (auction.status !== 'ongoing') return res.status(400).json({ error: 'Auction has ended' });
           
+          // Ensure this is a forward auction
+          if (auction.type !== 'forward') {
+            return res.status(400).json({ error: 'This is not a forward auction. For Dutch auctions, use acceptDutchPrice endpoint.' });
+          }
+          
           const currentPrice = auction.final_price || 0;
           if (bidAmount <= currentPrice) {
             return res.status(400).json({ error: 'Bid must be higher than current price' });
@@ -33,6 +38,48 @@ const auctionController = {
 
       createAuction: async (req, res) => {
         const { seller_id, name, description, starting_price, image_url, start_time, end_time, type } = req.body;
+
+        // Validate that all required parameters are present
+        const requiredParams = ['seller_id', 'name', 'description', 'starting_price', 'image_url', 'start_time', 'end_time', 'type'];
+        const missingParams = requiredParams.filter(param => req.body[param] === undefined);
+        
+        if (missingParams.length > 0) {
+            return res.status(400).json({ 
+                error: 'Missing required parameters', 
+                missingParams 
+            });
+        }
+
+        // Validate that starting price is greater than zero
+        if (parseFloat(starting_price) <= 0) {
+            return res.status(400).json({
+                error: 'Starting price must be greater than zero'
+            });
+        }
+
+        // Validate that end time is not before start time
+        const startDate = new Date(start_time);
+        const endDate = new Date(end_time);
+        const currentDate = new Date();
+        
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return res.status(400).json({
+                error: 'Invalid date format. Expected format: YYYY-MM-DD HH:MM:SS'
+            });
+        }
+        
+        // Validate that start time is not in the past
+        if (startDate < currentDate) {
+            return res.status(400).json({
+                error: 'Start time cannot be in the past'
+            });
+        }
+        
+        if (endDate <= startDate) {
+            return res.status(400).json({
+                error: 'End time must be after start time'
+            });
+        }
 
         try {
             //Create the item
@@ -85,6 +132,11 @@ const auctionController = {
         const { auctionId, newPrice } = req.body;
 
         try {
+            // Validate that newPrice is greater than 0
+            if (newPrice <= 0) {
+                return res.status(400).json({ error: 'Price must be greater than 0' });
+            }
+            
             // Get auction to verify it's a Dutch auction
             const auction = await AuctionModel.getAuctionById(auctionId);
             if (!auction) {
