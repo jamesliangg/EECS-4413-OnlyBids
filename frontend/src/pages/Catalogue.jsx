@@ -8,7 +8,7 @@ function Catalogue() {
   const handleSearch = (e) => {
     e.preventDefault()
     setError("")
-    fetch("/api/search/fullsearch?keyword=${encodeURIComponent(keyword)}")
+    fetch(`http://localhost:3000/api/search/fullsearch?keyword=${encodeURIComponent(keyword)}`)
       .then((res) => {
         if (!res.ok) throw new Error("Search failed")
         return res.json()
