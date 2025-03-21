@@ -4,14 +4,13 @@ const SearchModel =  {
 
     // For autocompletion
     findItemsAutocompletion: async (keyWord) => {
-        const [result]  = await db.query(
-            `SELECT name, image_url FROM Item WHERE name LIKE ? LIMIT 10`,
+        const [result] = await db.query(
+            `SELECT name, image_url FROM Item WHERE LOWER(name) LIKE LOWER(?) LIMIT 10`,
             [`%${keyWord}%`]
         );
-        
         return result;
     },
-
+    
     // For search button
     findItemsFullSearch: async(keyWord) => {
         const searchPattern = `%${keyWord}%`;
