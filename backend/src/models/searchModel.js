@@ -25,7 +25,8 @@ const SearchModel =  {
             a.end_time, 
             a.status, 
             a.winner_id, 
-            a.final_price
+            a.final_price,
+            a.type
         FROM Auction a
         JOIN Item i ON a.item_id = i.item_id
         WHERE a.status = 'ongoing' 
