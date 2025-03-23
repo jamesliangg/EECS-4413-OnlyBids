@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef  } from "react";
-
+import AuctionItem  from "./Item";
 function Catalogue() {
   const [keyword, setKeyword] = useState("");
   const [suggestions, setSuggestions] = useState([]); // For dropdown
@@ -43,7 +43,10 @@ function Catalogue() {
         if (!res.ok) throw new Error("Search failed");
         return res.json();
       })
-      .then((data) => setResults(data))
+      .then((data) => {
+        setResults(data)
+        console.log("DATA",data);
+      })
       .catch((err) => {
         console.error(err);
         setError("Error searching items");
@@ -107,12 +110,7 @@ function Catalogue() {
   
         <ul className="space-y-4 mt-4">
           {results.map((item) => (
-            <li key={item.auction_id} className="border p-3 rounded shadow-sm">
-              <p className="font-semibold">{item.name}</p>
-              <p>Current Price: {item.final_price !== null ? item.final_price : item.starting_price}</p>
-              <p>Auction Type: {item.type || "N/A"}</p>
-              <p>Status: {item.status}</p>
-            </li>
+           <AuctionItem key={item.id || item.name} auction={item} />
           ))}
         </ul>
       </div>
