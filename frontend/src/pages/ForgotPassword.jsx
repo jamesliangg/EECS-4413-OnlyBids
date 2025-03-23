@@ -1,6 +1,8 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 function ForgotPassword() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
   const [securityQuestion, setSecurityQuestion] = useState("")
@@ -25,6 +27,7 @@ function ForgotPassword() {
             data.message ||
               "If your email is registered, you'll receive the security question."
           )
+          navigate("/login")
         }
       })
       .catch((err) => console.error(err))
@@ -47,6 +50,7 @@ function ForgotPassword() {
           setMessage(data.error)
         } else {
           setMessage(data.message || "Password reset successful.")
+          
         }
       })
       .catch((err) => console.error(err))

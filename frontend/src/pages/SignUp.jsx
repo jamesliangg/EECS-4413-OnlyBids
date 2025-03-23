@@ -15,6 +15,8 @@ function SignUp() {
   const [country, setCountry] = useState("")
   const [postalCode, setPostalCode] = useState("")
   const [error, setError] = useState("")
+  const [question, setQuestion] = useState("")
+  const [answer, setAnswer] = useState("")
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -31,9 +33,11 @@ function SignUp() {
       city,
       country,
       postalCode,
+      security_question: question,
+      security_answer: answer
     }
 
-    fetch("/api/signup", {
+    fetch("http://localhost:3000/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -152,6 +156,25 @@ function SignUp() {
               className="border p-2 w-full rounded"
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
+              required
+            />
+          </div>
+          <h2 className = "text-xl font-bold">Security Information</h2>
+          <div>
+            <label className="block mb-1">Security Question</label>
+            <input
+              className="border p-2 w-full rounded"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Security Answer</label>
+            <input
+              className="border p-2 w-full rounded"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
               required
             />
           </div>

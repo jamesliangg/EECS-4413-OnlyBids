@@ -1,7 +1,9 @@
 import React, { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
+import { useUser } from "@/context/UserContext" 
 
 function SignIn() {
+  const { setUserID } = useUser();
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -22,6 +24,7 @@ function SignIn() {
       })
       .then((data) => {
         console.log("Signed in:", data)
+        setUserID(data.user.user_id);
         navigate("/catalogue")
       })
       .catch((err) => {

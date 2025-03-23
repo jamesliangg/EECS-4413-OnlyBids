@@ -105,11 +105,11 @@ const auctionController = {
     }
 
     // Validate that start time is not in the past
-    if (startDate < currentDate) {
-      return res.status(400).json({
-        error: "Start time cannot be in the past",
-      });
-    }
+    //if (startDate < currentDate) {
+      //return res.status(400).json({
+        //error: "Start time cannot be in the past",
+      //});
+    //}
 
     if (endDate <= startDate) {
       return res.status(400).json({

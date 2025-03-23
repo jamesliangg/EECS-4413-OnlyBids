@@ -1,6 +1,7 @@
 import React, { useState } from "react"
-
+import { useUser } from "@/context/UserContext"
 function SellItem() {
+  const { userID } = useUser()
   const [picture, setPicture] = useState(null)
   const [description, setDescription] = useState("")
   const [auctionType, setAuctionType] = useState("")
@@ -10,6 +11,7 @@ function SellItem() {
   const [startingBid, setStartingBid] = useState("")
   const [uploadMsg, setUploadMsg] = useState("")
   const [sellMsg, setSellMsg] = useState("")
+  const [name, setName] = useState("")
 
   const handleUpload = (e) => {
     e.preventDefault()
@@ -37,15 +39,24 @@ function SellItem() {
 
   const handleSellItem = (e) => {
     e.preventDefault()
+    
+    const now = new Date();
+    const start_time = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+    now.setHours(now.getHours() + parseInt(durationHours) + parseInt(durationDays) * 24);
+    now.setMinutes(now.getMinutes() + parseInt(durationMinutes));
+
+    const end_time = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
     const payload = {
       description,
-      auctionType,
-      durationDays,
-      durationHours,
-      durationMinutes,
-      startingBid,
+      type: auctionType,
+     start_time,
+     end_time,
+      starting_price: startingBid,
+      seller_id: userID,
+      image_url: "url",
+      name
     }
-    fetch("/api/SellItem", {
+    fetch("/api/auction/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -87,6 +98,16 @@ function SellItem() {
 
         <form onSubmit={handleSellItem} className="border p-4 space-y-4 rounded">
           {sellMsg && <p className="text-blue-600">{sellMsg}</p>}
+          <div>
+            <label className="block mb-1">Name</label>
+            <textarea
+              className="border p-2 w-full rounded"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Name of item..."
+              required
+            />
+          </div>
           <div>
             <label className="block mb-1">Item Description</label>
             <textarea
