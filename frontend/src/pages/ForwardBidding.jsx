@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react"
 import { io } from "socket.io-client"
+import { useLocation } from "react-router-dom";
 
 function ForwardBidding() {
+  const location = useLocation();
+  const auction = location.state?.auction;
+  
   const [auctionId, setAuctionId] = useState("")
   const [userId, setUserId] = useState("")
   const [bidAmount, setBidAmount] = useState("")

@@ -8,6 +8,7 @@ function Catalogue() {
   const dropdownRef = useRef(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [autocompleteResults, setAutocompleteResults] = useState([]);
+  const [selectedAuction, setSelectedAuction] = useState(null); 
 
   // Handle input change & fetch autocomplete suggestions
    const handleInputChange = (e) => {
@@ -66,6 +67,19 @@ function Catalogue() {
     };
   }, []);
 
+  const handleSelectAuction = (auction) => {
+    console.log(auction);
+    setSelectedAuction(auction);
+  };
+
+  const handleBid = (auction) => {
+    if (auction.type === "forward") {
+      navigate("/forward-bidding", { state: { auction } });
+    } else if (auction.type === "dutch") {
+      navigate("/dutch-bidding", { state: { auction } });
+    }
+  };
+  
   return (
     <div className="bg-blue-50 min-h-screen flex items-center justify-center">
       <div className="bg-white p-8 shadow-md rounded w-full max-w-xl">
@@ -110,9 +124,21 @@ function Catalogue() {
   
         <ul className="space-y-4 mt-4">
           {results.map((item) => (
-           <AuctionItem key={item.id || item.name} auction={item} />
+           <AuctionItem key={item.id || item.name} auction={item} onClick={() => handleSelectAuction(item)} isSelected={selectedAuction && selectedAuction?.auction_id === item.auction_id} />
           ))}
         </ul>
+        {selectedAuction && (
+          <div className="mt-4 p-4 border rounded bg-gray-100">
+            <h2 className="text-xl font-semibold">{selectedAuction.name}</h2>
+            <p className="text-gray-700">{selectedAuction.description}</p>
+            <button
+              onClick={handleBid(selectedAuction)}
+              className="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+            >
+              Bid
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
