@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef  } from "react";
+import { useNavigate } from "react-router-dom"
 import AuctionItem  from "./Item";
 function Catalogue() {
   const [keyword, setKeyword] = useState("");
@@ -9,7 +10,7 @@ function Catalogue() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [autocompleteResults, setAutocompleteResults] = useState([]);
   const [selectedAuction, setSelectedAuction] = useState(null); 
-
+  const navigate = useNavigate()
   // Handle input change & fetch autocomplete suggestions
    const handleInputChange = (e) => {
     const value = e.target.value;
@@ -79,7 +80,7 @@ function Catalogue() {
       navigate("/dutch-bidding", { state: { auction } });
     }
   };
-  
+
   return (
     <div className="bg-blue-50 min-h-screen flex items-center justify-center">
       <div className="bg-white p-8 shadow-md rounded w-full max-w-xl">
@@ -121,7 +122,7 @@ function Catalogue() {
 
         {error && <p className="text-red-500 mt-4">{error}</p>}
 
-  
+        
         <ul className="space-y-4 mt-4">
           {results.map((item) => (
            <AuctionItem key={item.id || item.name} auction={item} onClick={() => handleSelectAuction(item)} isSelected={selectedAuction && selectedAuction?.auction_id === item.auction_id} />
@@ -132,7 +133,7 @@ function Catalogue() {
             <h2 className="text-xl font-semibold">{selectedAuction.name}</h2>
             <p className="text-gray-700">{selectedAuction.description}</p>
             <button
-              onClick={handleBid(selectedAuction)}
+              onClick={() => {handleBid(selectedAuction)}}
               className="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
             >
               Bid

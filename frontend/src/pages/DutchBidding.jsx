@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from "react"
 import { io } from "socket.io-client"
 import { useLocation } from "react-router-dom";
-
+import { useUser } from "@/context/UserContext"
 function DutchBidding() {
+  const { userID } = useUser()
   const location = useLocation();
   const auction = location.state?.auction;
 
   const [auctionId, setAuctionId] = useState("")
-  const [userId, setUserId] = useState("")
+ // const [userId, setUserId] = useState("")
   const [currentPrice, setCurrentPrice] = useState(null)
   const [message, setMessage] = useState("")
   const [socket, setSocket] = useState(null)
+  const shippingPrice = "22"
+    useEffect(() => {
+      setAuctionId(auction.auction_id)
+      console.log("auctionwinner", auction.winnder_id)
+    }, [])
 
   useEffect(() => {
     if (!auctionId) return // only connect if have an auctionId
@@ -39,12 +45,11 @@ function DutchBidding() {
   }, [auctionId])
 
   const handleBuyNow = (e) => {
-    e.preventDefault()
     setMessage("")
     fetch("/api/auction/dutch/accept", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ auctionId, userId }),
+      body: JSON.stringify({ auctionId, userId: userID }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -58,56 +63,42 @@ function DutchBidding() {
   }
 
   return (
-    <div className="bg-blue-50 min-h-screen flex items-center justify-center">
-      <div className="bg-white p-8 shadow-md rounded w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Dutch Auction Bidding
-        </h1>
-        {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
-        <form className="space-y-4" onSubmit={handleBuyNow}>
-          <div>
-            <label className="block mb-1">Auction ID</label>
-            <input
-              className="border p-2 w-full rounded"
-              value={auctionId}
-              onChange={(e) => setAuctionId(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1">User ID</label>
-            <input
-              className="border p-2 w-full rounded"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              required
-            />
-          </div>
+    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div className="bg-white p-8 shadow-md rounded w-full max-w-lg">
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        Forward Auction Bidding
+      </h1>
 
-          {/* Display the current price */}
-          <div className="text-center my-4">
-            <p className="text-lg">
-              Current Price:{" "}
-              {currentPrice !== null ? (
-                <span className="font-semibold">${currentPrice}</span>
-              ) : (
-                "N/A"
-              )}
-            </p>
-          </div>
-
-          <button
-            type="submit"
-            className="
-              bg-blue-600 hover:bg-blue-700 text-white 
-              px-4 py-2 rounded w-full transition-colors
-            "
-          >
-            Buy Now
-          </button>
-        </form>
+      {/* Item Details Section */}
+      <div className="mb-6 p-4 border rounded bg-gray-50">
+        <h2 className="text-lg font-semibold">Item Details</h2>
+        <p className="text-gray-700">Description: {auction.description}</p>
+        <p className="text-gray-700">Shipping Price: ${shippingPrice}</p>
       </div>
+
+      {/* Current Price and Highest Bidder Section */}
+      <div className="mb-6 p-4 border rounded bg-gray-50">
+        <h2 className="text-lg font-semibold">Current Auction Status</h2>
+        <p className="text-gray-700">
+          <span className="font-semibold">Current Price:</span>{" "}
+          {auction.starting_price ? `$${auction.starting_price}`: "N/A"}
+        </p>
+      </div>
+
+      {/* Message Display */}
+      {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
+      <button
+          type="submit"
+          className="
+            bg-blue-600 hover:bg-blue-700 text-white 
+            px-4 py-2 rounded w-full transition-colors
+          "
+          onClick={() => {handleBuyNow()}}
+        >
+          Place Bid
+        </button>
     </div>
+  </div>
   )
 }
 
