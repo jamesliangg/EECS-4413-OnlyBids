@@ -100,7 +100,7 @@ const auctionController = {
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       return res.status(400).json({
-        error: "Invalid date format. Expected format: YYYY-MM-DD HH:MM:SS",
+        error: "Invalid date format. Expected ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)",
       });
     }
 
@@ -131,8 +131,8 @@ const auctionController = {
       // Create the auction
       const auctionId = await AuctionModel.createAuction({
         item_id,
-        start_time,
-        end_time,
+        start_time: formatForMySQL(start_time),
+        end_time: formatForMySQL(end_time),
         status: "ongoing",
         winner_id: null,
         final_price: null,
@@ -302,4 +302,9 @@ const auctionController = {
   },
 };
 
+const formatForMySQL = (isoString) => {
+  const date = new Date(isoString);
+  return date.toISOString().replace('T', ' ').replace(/\..+/, '');
+  // "2025-03-25T01:50:07.452Z" → "2025-03-25 01:50:07"
+};
 module.exports = auctionController;
