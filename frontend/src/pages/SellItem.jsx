@@ -28,7 +28,10 @@ function SellItem() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.error) setUploadMsg("Error: ${data.error}")
+        if (data.error) {
+          setUploadMsg("Error: ${data.error}")
+          console.log("EROR", data.error)
+        }
         else setUploadMsg("Picture uploaded successfully!")
       })
       .catch((err) => {
@@ -40,23 +43,36 @@ function SellItem() {
   const handleSellItem = (e) => {
     e.preventDefault()
     
-    const now = new Date();
-    const start_time = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-    now.setHours(now.getHours() + parseInt(durationHours) + parseInt(durationDays) * 24);
-    now.setMinutes(now.getMinutes() + parseInt(durationMinutes));
+    const days = parseInt(durationDays) || 0;
+  const hours = parseInt(durationHours) || 0;
+  const minutes = parseInt(durationMinutes) || 0;
+  
+  if (minutes < 1) {
+    setSellMsg("Duration must be at least 1 minute");
+    return;
+  }
 
-    const end_time = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-    const payload = {
-      description,
-      type: auctionType,
-     start_time,
-     end_time,
-      starting_price: startingBid,
-      seller_id: userID,
-      image_url: "url",
-      name
-    }
-    fetch("/api/auction/create", {
+  // Calculate end time
+  const now = new Date();
+  const endTime = new Date(
+    now.getTime() + 
+    days * 24 * 60 * 60 * 1000 + 
+    hours * 60 * 60 * 1000 + 
+    minutes * 60 * 1000
+  );
+
+  // Use ISO strings (UTC format)
+  const payload = {
+    description,
+    type: auctionType,
+    start_time: now.toISOString(), 
+    end_time: endTime.toISOString(),
+    starting_price: startingBid,
+    seller_id: userID,
+    image_url: "url", 
+    name
+  }
+    fetch("http://localhost:3000/api/auction/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

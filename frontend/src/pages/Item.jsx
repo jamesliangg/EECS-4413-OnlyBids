@@ -4,42 +4,49 @@ const AuctionItem = ({ auction, isSelected, onClick }) => {
   if (!auction) {
     return <p>Error: Auction data is missing</p>;
   }
-
+  const [timeLeft, setTimeLeft] = useState("")
   const { name, description, starting_price, image_url, end_time, status, final_price, type, auction_id} = auction;
 
-  // Function to calculate remaining time
-  function calculateTimeLeft() {
-    const now = new Date(); 
-    const end = new Date(end_time);
+  const formatFromMySQL = (mysqlDatetime) => {
+    if (!mysqlDatetime) return null;
+    // If it's already in ISO format, return as-is
+    if (mysqlDatetime.includes('T')) return mysqlDatetime;
+    // Handle both "2025-03-25 01:50:07" and "2025-03-25 01:50:07.000" formats
+    return mysqlDatetime.trim().endsWith('Z') 
+      ? mysqlDatetime 
+      : `${mysqlDatetime.replace(' ', 'T')}Z`;
+  };
 
-    const nowUTC = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-    
-    const diff = end - nowUTC; 
-    console.log(end, nowUTC)
-    if (diff <= 0) {
-        return "Auction ended";
-    }
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    return `${hours}h ${minutes}m ${seconds}s`;
-}
-
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-/*
   useEffect(() => {
-    if (status === "ongoing") {
-      const timer = setInterval(() => {
-        setTimeLeft(calculateTimeLeft());
-      }, 1000);
+    if (!auction || !auction.end_time) return;
 
+    const updateCountdown = () => {
+      const now = new Date();
+      console.log("endtime",end_time)
+      const end = new Date(formatFromMySQL(end_time));
+      const diff = end - now;
+
+      if (diff <= 0) {
+        setTimeLeft('Auction ended');
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+    };
+
+  
+    updateCountdown();
+    
+    if (auction.status === 'ongoing') {
+      const timer = setInterval(updateCountdown, 1000);
       return () => clearInterval(timer);
     }
-  }, [end_time, status]);
-*/
+  }, [auction]);
+
 
   return (
     <li

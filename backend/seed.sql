@@ -29,15 +29,15 @@ INSERT INTO Item (seller_id, name, description, starting_price, image_url) VALUE
 
 -- Insert auctions (3 forward, 2 dutch)
 -- Using variables to set end time 3 hours from now
-SET @end_time = DATE_ADD(NOW(), INTERVAL 3 HOUR);
+SET @end_time = DATE_ADD(UTC_TIMESTAMP(), INTERVAL 3 HOUR);
 
 -- Forward Auctions
 INSERT INTO Auction (item_id, start_time, end_time, status, type) VALUES
-(1, NOW(), @end_time, 'ongoing', 'forward'),
-(2, NOW(), @end_time, 'ongoing', 'forward'),
-(3, NOW(), @end_time, 'ongoing', 'forward');
+(1, UTC_TIMESTAMP(), @end_time, 'ongoing', 'forward'),
+(2, UTC_TIMESTAMP(), @end_time, 'ongoing', 'forward'),
+(3, UTC_TIMESTAMP(), @end_time, 'ongoing', 'forward');
 
 -- Dutch Auctions
 INSERT INTO Auction (item_id, start_time, end_time, status, type) VALUES
-(4, NOW(), @end_time, 'ongoing', 'dutch'),
-(5, NOW(), @end_time, 'ongoing', 'dutch'); 
+(4, UTC_TIMESTAMP(), @end_time, 'ongoing', 'dutch'),
+(5, UTC_TIMESTAMP(), @end_time, 'ongoing', 'dutch'); 
