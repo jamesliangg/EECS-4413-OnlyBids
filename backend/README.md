@@ -7,6 +7,7 @@ DB_USER=mysql_user
 DB_PASSWORD=mysql_user_password
 DB_NAME=onlybids_database
 PORT=3000
+MYSQL_ROOT_PASSWORD=root_password
 ```
 
 ## Build and start the containers (MySQL and Node.js)
