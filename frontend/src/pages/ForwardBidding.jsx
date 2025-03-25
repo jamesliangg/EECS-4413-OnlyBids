@@ -23,34 +23,34 @@ function ForwardBidding() {
   }, [auction])
 
   useEffect(() => {
-    if (!auctionId) return // only connect if auctionId exists
+    if (!auctionId) return;
+    const newSocket = io("http://localhost:3000", { transports: ["websocket"] });
 
-    // Create a new socket connection
-    const newSocket = io({
-      // Add connection options if necessary
+    setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      console.log(newSocket.id);
+    });
+  
+    newSocket.emit("joinAuction", auctionId);
+
+    // Listen for bid updates
+    newSocket.on("joinedAuction", (data) => {
+      console.log(`${data.roomName}-${userID}:Joined room`)
     })
-
-    setSocket(newSocket)
-
-    // Join the specific auction room
-    newSocket.emit("joinAuction", auctionId)
-
-    // Listen to real-time price updates
     newSocket.on("newBid", (data) => {
-      if (data.auctionId === auctionId) {
-        setHighestBid(data.bidAmount)
-        setHighestBidder(data.userId)
-      }
-    })
+        setHighestBid(data?.bidAmount);
+        setHighestBidder(data?.userId);   
+    });
 
     return () => {
-      newSocket.disconnect()
-    }
+      newSocket.disconnect();
+    };
   }, [auctionId])
 
   // Place a new forward bid
   const handlePlaceBid = (e) => {
-    e.preventDefault() // Prevent form submission from refreshing the page
+    e.preventDefault()
     setMessage("")
 
     fetch("/api/auction/bid", {
