@@ -55,6 +55,7 @@ function DutchBidding() {
       .then((data) => {
         if (data.error) setMessage(`Error: ${data.error}`)
         else setMessage(data.message || "Dutch auction price accepted!")
+        
       })
       .catch((err) => {
         console.error(err)

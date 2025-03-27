@@ -12,6 +12,8 @@ import Payment from "./pages/Payment"
 import Receipt from "./pages/Receipt"
 import SellItem from "./pages/SellItem"
 import AuctionEnded from "./pages/AuctionEnded"
+import { useUser } from "@/context/UserContext" 
+
 
 function Home() {
   return (
@@ -67,6 +69,7 @@ function Home() {
 }
 
 function App() {
+  const { userID } = useUser()
   return (
     <Router>
       <nav className="px-8 py-4 bg-slate-900 shadow flex items-center justify-between">
@@ -77,7 +80,8 @@ function App() {
           OnlyBids
         </Link>
 
-        <div className="flex space-x-6">
+        
+        {userID && (<div className="flex space-x-6">
           <Link
             to="/catalogue"
             className="text-gray-300 hover:text-gray-100 transition-colors"
@@ -90,9 +94,8 @@ function App() {
           >
             Sell Item
           </Link>
-        </div>
+        </div>)}
       </nav>
-
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />

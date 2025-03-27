@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef  } from "react";
 import { useNavigate } from "react-router-dom"
 import AuctionItem  from "./Item";
+
 function Catalogue() {
   const [keyword, setKeyword] = useState("");
   const [suggestions, setSuggestions] = useState([]); // For dropdown
