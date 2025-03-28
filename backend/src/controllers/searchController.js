@@ -1,9 +1,9 @@
 const SearchModel = require('../models/searchModel');
 
-// Validates that a search keyword only contains alphanumeric and special characters
+// Validates that a search keyword only contains alphanumeric, spaces, and special characters
 const isValidSearchKeyword = (keyword) => {
-    // Allow alphanumeric characters and common special characters for search
-    const validKeywordRegex = /^[A-Za-z0-9!@#$%^&*()]+$/;
+    // Allow alphanumeric characters, spaces, and common special characters for search
+    const validKeywordRegex = /^[A-Za-z0-9!@#$%^&*()\s]+$/;
     
     return validKeywordRegex.test(keyword);
 };
