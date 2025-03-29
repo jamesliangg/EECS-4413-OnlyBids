@@ -53,7 +53,7 @@ function ForwardBidding() {
     e.preventDefault()
     setMessage("")
 
-    fetch("/api/auction/bid", {
+    fetch("http://localhost:3000/api/auction/bid", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ auctionId, userId: userID, bidAmount }),
