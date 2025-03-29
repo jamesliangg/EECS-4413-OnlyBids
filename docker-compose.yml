@@ -52,7 +52,20 @@ services:
       - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:3000
+      - VITE_API_URL=http://backend:3000
+    depends_on:
+      - backend
+
+  # K6 service for performance testing
+  k6:
+    image: grafana/k6:latest
+    container_name: k6_test
+    volumes:
+      - ./backend/tests/performance:/scripts
+    environment:
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - K6_PROMETHEUS_RW_USERNAME=admin
+      - K6_PROMETHEUS_RW_PASSWORD=admin
     depends_on:
       - backend
 

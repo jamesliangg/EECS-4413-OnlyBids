@@ -30,7 +30,7 @@ const SearchModel =  {
         FROM Auction a
         JOIN Item i ON a.item_id = i.item_id
         WHERE a.status = 'ongoing' 
-        AND (i.name LIKE ? OR i.description LIKE ?)
+        AND (LOWER(i.name) LIKE LOWER(?) OR LOWER(i.description) LIKE LOWER(?))
         ORDER BY a.start_time DESC;`,
         [searchPattern, searchPattern]
         );
