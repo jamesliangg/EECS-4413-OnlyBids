@@ -42,5 +42,10 @@ docker-compose down -v
 docker-compose logs
 ```
 
+## To run K6 performance testing
+Start after you've run the build command
+```shell
+docker-compose run k6 run /scripts/load-test.js
+```
 
 
