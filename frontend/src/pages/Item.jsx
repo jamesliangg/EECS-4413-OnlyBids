@@ -49,7 +49,7 @@ const AuctionItem = ({ auction, isSelected, onClick }) => {
 
 
   return (
-    <li
+    <div
     className={`p-4 border rounded cursor-pointer ${isSelected ? "bg-blue-200" : "bg-white"}`}
     onClick={() => {
       console.log(`Clicked on ${auction.name}`);
@@ -63,7 +63,7 @@ const AuctionItem = ({ auction, isSelected, onClick }) => {
       <p>Status: {status}</p>
       <p>Time left: {timeLeft || "N/A"}</p>
       <p>Description: {description}</p>
-    </li>
+    </div>
   );
 };
 

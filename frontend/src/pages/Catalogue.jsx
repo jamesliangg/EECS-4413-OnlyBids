@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef  } from "react";
 import { useNavigate } from "react-router-dom"
 import AuctionItem  from "./Item";
+import { useUser } from "@/context/UserContext";
 
 function Catalogue() {
+  const { userID } = useUser();
   const [keyword, setKeyword] = useState("");
   const [suggestions, setSuggestions] = useState([]); // For dropdown
   const [results, setResults] = useState([]); // Full search results
@@ -11,6 +13,8 @@ function Catalogue() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [autocompleteResults, setAutocompleteResults] = useState([]);
   const [selectedAuction, setSelectedAuction] = useState(null); 
+  const [watchlistMessage, setWatchlistMessage] = useState("");
+
   const navigate = useNavigate()
   // Handle input change & fetch autocomplete suggestions
    const handleInputChange = (e) => {
@@ -82,6 +86,22 @@ function Catalogue() {
     }
   };
 
+  const handleAddToWatchlist = async (auctionId) => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/watchlist/add`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userID, auction_id: auctionId }),
+        });
+  
+        if (!response.ok) throw new Error("Failed to add to watchlist");
+        
+        setWatchlistMessage("Added to watchlist!");
+      } catch (err) {
+        console.error(err);
+        setWatchlistMessage("Error adding to watchlist");
+      }
+    };
   return (
     <div className="bg-blue-50 min-h-screen flex items-center justify-center">
       <div className="bg-white p-8 shadow-md rounded w-full max-w-xl">
@@ -123,10 +143,20 @@ function Catalogue() {
 
         {error && <p className="text-red-500 mt-4">{error}</p>}
 
-        
+        <div>{watchlistMessage}</div>
         <ul className="space-y-4 mt-4">
-          {results.map((item) => (
-           <AuctionItem key={item.id || item.name} auction={item} onClick={() => handleSelectAuction(item)} isSelected={selectedAuction && selectedAuction?.auction_id === item.auction_id} />
+        {results.map((item) => (
+            <div key={item.id || item.name} className="p-4 border rounded bg-gray-50 flex justify-between items-center">
+              <AuctionItem auction={item} onClick={() => handleSelectAuction(item)} isSelected={selectedAuction?.auction_id === item.auction_id} />
+
+              {/* Add to Watchlist Button */}
+              <button
+                onClick={() => handleAddToWatchlist(item.auction_id)}
+                className="ml-4 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+              >
+                Add to Watchlist
+              </button>
+            </div>
           ))}
         </ul>
         {selectedAuction && (
