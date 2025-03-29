@@ -3,6 +3,7 @@ const userRoutes = require("./routes/userRoutes");
 const searchRoutes = require("./routes/searchRoutes");
 const auctionRoutes = require("./routes/auctionRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const watchlistRoutes = require("./routes/watchListRoutes");
 const socketConfig = require("./config/socket");
 const http = require("http");
 const cors = require("cors");
@@ -33,6 +34,9 @@ app.use("/api/auction", auctionRoutes);
 
 // Payment routes
 app.use("/api/payment", paymentRoutes);
+
+//watchlist routes
+app.use("/api/watchlist", watchlistRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

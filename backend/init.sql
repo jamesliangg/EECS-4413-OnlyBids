@@ -41,6 +41,15 @@ CREATE TABLE Auction (
     FOREIGN KEY (winner_id) REFERENCES User(user_id) ON DELETE SET NULL
 );
 
+CREATE TABLE Watchlist (
+    watchlist_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    auction_id INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (auction_id) REFERENCES Auction(auction_id) ON DELETE CASCADE
+);
+
 CREATE TABLE Payment (
     payment_id INT PRIMARY KEY AUTO_INCREMENT,
     auction_id INT NOT NULL,

@@ -12,6 +12,7 @@ import Payment from "./pages/Payment"
 import Receipt from "./pages/Receipt"
 import SellItem from "./pages/SellItem"
 import AuctionEnded from "./pages/AuctionEnded"
+import Watchlist from "./pages/Watchlist"
 import { useUser } from "@/context/UserContext" 
 
 
@@ -83,6 +84,12 @@ function App() {
         
         {userID && (<div className="flex space-x-6">
           <Link
+            to="/watchlist"
+            className="text-gray-300 hover:text-gray-100 transition-colors"
+          >
+            Watchlist
+          </Link>
+          <Link
             to="/catalogue"
             className="text-gray-300 hover:text-gray-100 transition-colors"
           >
@@ -109,6 +116,7 @@ function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/receipt" element={<Receipt />} />
         <Route path="/sell-item" element={<SellItem />} />
+        <Route path="/watchlist" element={<Watchlist />} />
       </Routes>
     </Router>
   )
