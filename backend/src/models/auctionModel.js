@@ -100,6 +100,23 @@ const AuctionModel = {
     );
     return result.affectedRows > 0;
   },
+
+  getAuctionWinnings: async (userId) => {
+    const query = `
+      SELECT a.*, i.name, i.description, i.image_url 
+      FROM Auction a
+      JOIN Item i ON a.item_id = i.item_id
+      WHERE a.winner_id = ? AND a.status = 'completed'
+    `;
+    try {
+        const [result] = await db.query(query, [userId]);
+        return result;
+    } catch (error) {
+        console.error("Error fetching auction winnings:", error);
+        throw error;
+    }
+}
+
 };
 
 module.exports = AuctionModel;

@@ -85,7 +85,7 @@ function ForwardBidding() {
   const handlePayment = () => {
     navigate("/payment",{state: {auction_id: auctionId, user_id: userID}});
   }
-  
+
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
       <div className="bg-white p-8 shadow-md rounded w-full max-w-lg">
@@ -140,7 +140,7 @@ function ForwardBidding() {
             Place Bid
           </button>
         </form>)}
-        {isHighestBidder (<button
+        {isHighestBidder && (<button
             type="submit"
             className="
               bg-blue-600 hover:bg-blue-700 text-white 
@@ -148,7 +148,7 @@ function ForwardBidding() {
             "
             onClick={() => handlePayment()}
           >
-            Place Bid
+            Pay Now
           </button>)}
       </div>
     </div>

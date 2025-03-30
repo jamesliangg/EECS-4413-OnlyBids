@@ -300,6 +300,21 @@ const auctionController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+
+  getUserAuctionWinnings: async (req, res) => {
+    const { userId } = req.params;
+
+    if(!userId) {
+      return res.status(400).json({error: "UserId is null"});
+    }
+    try{
+      const rows = await AuctionModel.getAuctionWinnings(userId);
+      return res.status(200).json(rows)
+    } catch (error) {
+      console.error("Error getting Auction Winnings:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
 };
 
 const formatForMySQL = (isoString) => {

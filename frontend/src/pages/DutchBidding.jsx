@@ -22,7 +22,7 @@ function DutchBidding() {
   const shippingPrice = "22"
     useEffect(() => {
       setAuctionId(auction?.auction_id)
-      isBid(auction?.winner_id === userID);
+      setIsBid(auction?.winner_id === userID);
     }, [])
 
   useEffect(() => {
