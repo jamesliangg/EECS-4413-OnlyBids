@@ -53,7 +53,7 @@ const paymentController = {
       const date = new Date();
       var month = date.getMonth().toString();
       var year = date.getFullYear().toString();
-      var expDateRegEx = RegExp("^(0[1-9]{1}|1[0-2]{1})\/{1}[0-9]{2}$");
+      var expDateRegEx = RegExp("^(0[1-9]{1}|1[0-2]{1})/{1}[0-9]{2}$");
 
       if (month < 10) {
         month = 0 + month;
@@ -61,10 +61,9 @@ const paymentController = {
 
       if (
         !expDateRegEx.test(expDate) ||
-        (parseInt(expDate.substring(3, 5)) < parseInt(year.substring(2, 4)) ||
-          (parseInt(expDate.substring(3, 5)) >=
-            parseInt(year.substring(2, 4)) &&
-            parseInt(expDate.substring(0, 2)) < parseInt(month)))
+        parseInt(expDate.substring(3, 5)) < parseInt(year.substring(2, 4)) ||
+        (parseInt(expDate.substring(3, 5)) >= parseInt(year.substring(2, 4)) &&
+          parseInt(expDate.substring(0, 2)) < parseInt(month))
       ) {
         return res.status(400).json({ error: "Invalid card expiry date" });
       }
