@@ -18,7 +18,7 @@ const WatchlistModel = {
             FROM Watchlist w
             JOIN Auction a ON w.auction_id = a.auction_id
             JOIN Item i ON a.item_id = i.item_id
-            WHERE w.user_id = ?`;
+            WHERE w.user_id = ? AND a.status = 'ongoing`;
         
         const [rows] = await db.execute(query, [user_id]);
         return rows;

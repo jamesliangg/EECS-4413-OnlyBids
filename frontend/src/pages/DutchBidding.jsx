@@ -2,20 +2,27 @@ import React, { useState, useEffect } from "react"
 import { io } from "socket.io-client"
 import { useLocation } from "react-router-dom";
 import { useUser } from "@/context/UserContext"
+import { useNavigate } from "react-router-dom"
+
 function DutchBidding() {
+  const navigate = useNavigate();
   const { userID } = useUser()
   const location = useLocation();
   const auction = location.state?.auction;
+  console.log("auction")
 
   const [auctionId, setAuctionId] = useState("")
  // const [userId, setUserId] = useState("")
   const [currentPrice, setCurrentPrice] = useState(null)
   const [message, setMessage] = useState("")
   const [socket, setSocket] = useState(null)
+  const [isBid, setIsBid] = useState(false)
+  
+
   const shippingPrice = "22"
     useEffect(() => {
-      setAuctionId(auction.auction_id)
-      console.log("auctionwinner", auction.winnder_id)
+      setAuctionId(auction?.auction_id)
+      isBid(auction?.winner_id === userID);
     }, [])
 
   useEffect(() => {
@@ -43,10 +50,13 @@ function DutchBidding() {
       newSocket.disconnect()
     }
   }, [auctionId])
+  const handlePayment = () => {
+    navigate("/payment",{state: {auction_id: auctionId, user_id: userID}});
+  }
 
   const handleBuyNow = (e) => {
     setMessage("")
-    fetch("/api/auction/dutch/accept", {
+    fetch("http://localhost:3000/api/auction/dutch/accept", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ auctionId, userId: userID }),
@@ -55,6 +65,7 @@ function DutchBidding() {
       .then((data) => {
         if (data.error) setMessage(`Error: ${data.error}`)
         else setMessage(data.message || "Dutch auction price accepted!")
+      setIsBid(true)
         
       })
       .catch((err) => {
@@ -88,7 +99,7 @@ function DutchBidding() {
 
       {/* Message Display */}
       {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
-      <button
+      { !isBid && (<button
           type="submit"
           className="
             bg-blue-600 hover:bg-blue-700 text-white 
@@ -97,8 +108,19 @@ function DutchBidding() {
           onClick={() => {handleBuyNow()}}
         >
           Place Bid
-        </button>
+        </button>)}
+        {isBid && (<button
+          type="submit"
+          className="
+            bg-blue-600 hover:bg-blue-700 text-white 
+            px-4 py-2 rounded w-full transition-colors
+          "
+          onClick={() => {handlePayment()}}
+        >
+          Pay Now
+        </button>)}
     </div>
+
   </div>
   )
 }

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 //removes any non-digit characters
 //set max length
@@ -14,6 +14,8 @@ function DigitsOnly(e, setter, maxLen) {
 function Payment() {
   // default shipping address for illustration
   const [shippingAddress] = useState("4700 Keele St, North York, ON M3J 1P3")
+
+  const {auction_id, user_id} = useLocation().state;
 
   const [cardNumber, setCardNumber] = useState("")
   const [cardholder, setCardholder] = useState("")
@@ -46,18 +48,20 @@ function Payment() {
     e.preventDefault()
     setMessage("")
 
-    const payload = {
+   const paymentData = {
+      auction_id,
+      user_id,
+      isExpedited: false,
       cardNumber,
       cardholder,
       expDate: `${expireMM}/${expireYY}`,
       cvv,
-      phoneNumber,
     }
 
-    fetch("/api/payment/pay", {
+    fetch("http://localhost:3000/api/payment/pay", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(paymentData),
     })
       .then((res) => res.json())
       .then((data) => {
