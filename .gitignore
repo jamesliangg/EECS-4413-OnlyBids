@@ -482,3 +482,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/node,webstorm+all,visualstudiocode,macos,windows,react,nextjs
+backend/tests/performance/results.json

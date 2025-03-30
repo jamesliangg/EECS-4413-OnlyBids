@@ -48,4 +48,9 @@ Start after you've run the build command
 docker-compose run k6 run /scripts/load-test.js
 ```
 
+To save results in `backend/tests/performance/results.json` (run this command in root directory)
+```shell
+docker-compose run -v $(pwd)/backend/tests/performance:/scripts k6 run --out json=/scripts/results.json /scripts/load-test.js
+```
+
 
