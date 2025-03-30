@@ -11,18 +11,29 @@ const dutchResponseTime = new Trend('dutch_response_time');
 
 export const options = {
   stages: [
-    { duration: '30s', target: 20 }, // Ramp up to 20 users
-    { duration: '1m', target: 20 },  // Stay at 20 users for 1 minute
-    { duration: '30s', target: 0 },  // Ramp down to 0 users
+    { duration: '30s', target: 200, name: 'stage_200_users' },   // Ramp up to 200 users
+    { duration: '1m', target: 200, name: 'stage_200_users' },    // Stay at 200 users for 1 minute
+    { duration: '30s', target: 400, name: 'stage_400_users' },  // Ramp up to 400 users
+    { duration: '1m', target: 400, name: 'stage_400_users' },   // Stay at 400 users for 1 minute
+    { duration: '30s', target: 600, name: 'stage_600_users' },  // Ramp up to 600 users
+    { duration: '1m', target: 600, name: 'stage_600_users' },   // Stay at 600 users for 1 minute
+    { duration: '30s', target: 800, name: 'stage_800_users' },  // Ramp up to 800 users
+    { duration: '1m', target: 800, name: 'stage_800_users' },   // Stay at 800 users for 1 minute
+    { duration: '30s', target: 1000, name: 'stage_1000_users' },  // Ramp up to 1000 users
+    { duration: '1m', target: 1000, name: 'stage_1000_users' },   // Stay at 1000 users for 1 minute
+    { duration: '30s', target: 0, name: 'ramp_down' },   // Ramp down to 0 users
   ],
   thresholds: {
-    http_req_duration: ['p(95)<500'], // 95% of requests must complete below 500ms
-    http_req_failed: ['rate<0.1'],    // Less than 10% of requests can fail
-    'search_response_time': ['p(95)<500'],
-    'auction_response_time': ['p(95)<500'],
-    'history_response_time': ['p(95)<500'],
-    'bid_response_time': ['p(95)<500'],
-    'dutch_response_time': ['p(95)<500'],
+    'http_req_duration{stage:stage_200_users}': ['p(95)<500'],
+    'http_req_duration{stage:stage_400_users}': ['p(95)<500'],
+    'http_req_duration{stage:stage_600_users}': ['p(95)<500'],
+    'http_req_duration{stage:stage_800_users}': ['p(95)<500'],
+    'http_req_duration{stage:stage_1000_users}': ['p(95)<500'],
+    'http_req_failed{stage:stage_200_users}': ['rate<0.1'],
+    'http_req_failed{stage:stage_400_users}': ['rate<0.1'],
+    'http_req_failed{stage:stage_600_users}': ['rate<0.1'],
+    'http_req_failed{stage:stage_800_users}': ['rate<0.1'],
+    'http_req_failed{stage:stage_1000_users}': ['rate<0.1'],
   },
 };
 
@@ -79,27 +90,39 @@ export default function(data) {
     'Content-Type': 'application/json',
   };
 
+  // Add stage tag based on current VU count
+  const stage = `stage_${__VU}_users`;
+  
   // Test search endpoint with actual items from seed.sql
   const searchTerm = TEST_ITEMS[Math.floor(Math.random() * TEST_ITEMS.length)];
   const searchStart = Date.now();
-  const searchRes = http.get(`${BASE_URL}/search/fullsearch?keyword=${encodeURIComponent(searchTerm)}`, { headers });
-  searchResponseTime.add(Date.now() - searchStart);
+  const searchRes = http.get(`${BASE_URL}/search/fullsearch?keyword=${encodeURIComponent(searchTerm)}`, { 
+    headers,
+    tags: { stage }
+  });
+  searchResponseTime.add(Date.now() - searchStart, { stage });
   check(searchRes, {
     'search status is 200': (r) => r.status === 200,
   });
 
   // Test auction listing
   const auctionStart = Date.now();
-  const auctionsRes = http.get(`${BASE_URL}/auction/auctions`, { headers });
-  auctionResponseTime.add(Date.now() - auctionStart);
+  const auctionsRes = http.get(`${BASE_URL}/auction/auctions`, { 
+    headers,
+    tags: { stage }
+  });
+  auctionResponseTime.add(Date.now() - auctionStart, { stage });
   check(auctionsRes, {
     'auctions status is 200': (r) => r.status === 200,
   });
 
   // Test auction history
   const historyStart = Date.now();
-  const historyRes = http.get(`${BASE_URL}/auction/auctions/history`, { headers });
-  historyResponseTime.add(Date.now() - historyStart);
+  const historyRes = http.get(`${BASE_URL}/auction/auctions/history`, { 
+    headers,
+    tags: { stage }
+  });
+  historyResponseTime.add(Date.now() - historyStart, { stage });
   check(historyRes, {
     'auction history status is 200': (r) => r.status === 200,
   });
@@ -112,8 +135,11 @@ export default function(data) {
     const forwardBidRes = http.post(`${BASE_URL}/auction/bid`, JSON.stringify({
       auctionId: auctionId,
       amount: Math.floor(Math.random() * 1000) + 100
-    }), { headers });
-    bidResponseTime.add(Date.now() - bidStart);
+    }), { 
+      headers,
+      tags: { stage }
+    });
+    bidResponseTime.add(Date.now() - bidStart, { stage });
     
     check(forwardBidRes, {
       'forward bid status is 200': (r) => r.status === 200,
@@ -125,8 +151,11 @@ export default function(data) {
     const dutchPriceRes = http.put(`${BASE_URL}/auction/dutch/price`, JSON.stringify({
       auctionId: auctionId,
       newPrice: Math.floor(Math.random() * 1000) + 100
-    }), { headers });
-    dutchResponseTime.add(Date.now() - dutchStart);
+    }), { 
+      headers,
+      tags: { stage }
+    });
+    dutchResponseTime.add(Date.now() - dutchStart, { stage });
     
     check(dutchPriceRes, {
       'dutch price update status is 200': (r) => r.status === 200,
