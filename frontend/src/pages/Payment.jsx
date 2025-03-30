@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 //removes any non-digit characters
@@ -16,7 +16,7 @@ function Payment() {
   const [shippingAddress] = useState("4700 Keele St, North York, ON M3J 1P3");
 
   const { auction_id, user_id } = useLocation().state;
-
+  const auction = location.state?.auction;
   const [cardNumber, setCardNumber] = useState("");
   const [cardholder, setCardholder] = useState("");
   const [expireMM, setExpireMM] = useState("");
@@ -24,10 +24,15 @@ function Payment() {
   const [cvv, setCvv] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [message, setMessage] = useState("");
-  const [subtotal, setSubtotal] = useState("");
-  const [shipping, setShipping] = useState("");
-  const [tax, setTax] = useState("");
-  const [total, setTotal] = useState("");
+  const [subtotal, setSubtotal] = useState();
+  const [shipping, setShipping] = useState();
+  const [total, setTotal] = useState();
+
+  useEffect(() => {
+    setSubtotal(parseFloat(auction?.final_price));
+    setShipping(parseFloat(auction?.shipping_price));
+    setTotal(parseFloat(auction?.final_price + auction?.shipping_price));
+  }, [auction]);
 
   // refs for jumping from MM to YY
   const mmRef = useRef(null);
@@ -91,10 +96,9 @@ function Payment() {
         <div className="bg-white p-8 mb-4 shadow-md rounded w-80% max-w-md">
           <h2 className="font-semibold">Payment Details</h2>
           <br />
-          <p>Subtotal: </p>
-          <p>Shipping: </p>
-          <p>Tax: </p>
-          <h3 className="font-semibold">Total:</h3>
+          <p>Subtotal: {subtotal}</p>
+          <p>Shipping: {shipping}</p>
+          <h3 className="font-semibold">Total: {total}</h3>
         </div>
 
         {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
