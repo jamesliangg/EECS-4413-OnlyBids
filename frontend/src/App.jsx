@@ -97,6 +97,12 @@ function App() {
             Watchlist
           </Link>
           <Link
+            to="/update-dutch"
+            className="text-gray-300 hover:text-gray-100 transition-colors"
+          >
+            Update Dutch Auctions
+          </Link>
+          <Link
             to="/catalogue"
             className="text-gray-300 hover:text-gray-100 transition-colors"
           >
@@ -125,6 +131,7 @@ function App() {
         <Route path="/sell-item" element={<SellItem />} />
         <Route path="/watchlist" element={<Watchlist />} />
         <Route path="/winnings" element={<Winnings/>} />
+        <Route path="/update-dutch" element={<UpdateDutch/>}/>
       </Routes>
     </Router>
   )

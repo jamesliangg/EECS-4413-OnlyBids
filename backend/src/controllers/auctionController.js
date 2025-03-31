@@ -1,12 +1,25 @@
 const AuctionModel = require("../models/auctionModel");
 const socketConfig = require("../config/socket");
 const ItemModel = require("../models/itemModel");
+const xss = require('xss');
+
+// Sanitize user input
+const sanitizeUserInput = (input) => {
+    if (typeof input !== 'string') return input;
+    return xss(input, {
+        whiteList: {}, // Don't allow any HTML tags
+        stripIgnoreTag: true, // Strip HTML tags
+        stripIgnoreTagBody: ['script'] // Strip script tags and their content
+    });
+};
 
 const auctionController = {
   placeBid: async (req, res) => {
     const { auctionId, userId, bidAmount } = req.body;
+    const sanitizedAuctionId = sanitizeUserInput(auctionId);
+    const sanitizedUserId = sanitizeUserInput(userId);
     try {
-      const auction = await AuctionModel.getAuctionById(auctionId);
+      const auction = await AuctionModel.getAuctionById(sanitizedAuctionId);
       if (!auction) return res.status(404).json({ error: "Auction not found" });
       if (auction.status !== "ongoing")
         return res.status(400).json({ error: "Auction has ended" });
@@ -28,9 +41,9 @@ const auctionController = {
 
       // Update the auction bid.
       await AuctionModel.updateAuctionBid(
-        auctionId,
+        sanitizedAuctionId,
         bidAmount,
-        userId,
+        sanitizedUserId,
         "ongoing"
       );
 
@@ -38,9 +51,9 @@ const auctionController = {
 
       // Enter auction room
       // https://socket.io/docs/v3/rooms/
-      io.to(`auction_${auctionId}`).emit("newBid", {
-        auctionId,
-        userId,
+      io.to(`auction_${sanitizedAuctionId}`).emit("newBid", {
+        auctionId: sanitizedAuctionId,
+        userId: sanitizedUserId,
         bidAmount,
       });
       res.status(200).json({ message: "Bid placed successfully!" });
@@ -61,6 +74,15 @@ const auctionController = {
       end_time,
       type,
     } = req.body;
+
+    // Sanitize all string inputs
+    const sanitizedSellerId = sanitizeUserInput(seller_id);
+    const sanitizedName = sanitizeUserInput(name);
+    const sanitizedDescription = sanitizeUserInput(description);
+    const sanitizedImageUrl = sanitizeUserInput(image_url);
+    const sanitizedStartTime = sanitizeUserInput(start_time);
+    const sanitizedEndTime = sanitizeUserInput(end_time);
+    const sanitizedType = sanitizeUserInput(type);
 
     // Validate that all required parameters are present
     const requiredParams = [
@@ -92,8 +114,8 @@ const auctionController = {
     }
 
     // Validate that end time is not before start time
-    const startDate = new Date(start_time);
-    const endDate = new Date(end_time);
+    const startDate = new Date(sanitizedStartTime);
+    const endDate = new Date(sanitizedEndTime);
     const currentDate = new Date();
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
@@ -119,23 +141,23 @@ const auctionController = {
     try {
       //Create the item
       const item_id = await ItemModel.createItem({
-        seller_id,
-        name,
-        description,
+        seller_id: sanitizedSellerId,
+        name: sanitizedName,
+        description: sanitizedDescription,
         starting_price,
-        image_url,
+        image_url: sanitizedImageUrl,
       });
       if (!item_id)
         return res.status(500).json({ error: "Item creation failed" });
       // Create the auction
       const auctionId = await AuctionModel.createAuction({
         item_id,
-        start_time: formatForMySQL(start_time),
-        end_time: formatForMySQL(end_time),
+        start_time: formatForMySQL(sanitizedStartTime),
+        end_time: formatForMySQL(sanitizedEndTime),
         status: "ongoing",
         winner_id: null,
         final_price: null,
-        type,
+        type: sanitizedType,
       });
 
       if (!auctionId)
@@ -152,8 +174,9 @@ const auctionController = {
 
   getAuction: async (req, res) => {
     const { auctionId } = req.params;
+    const sanitizedAuctionId = sanitizeUserInput(auctionId);
     try {
-      const result = await AuctionModel.getAuctionById(auctionId);
+      const result = await AuctionModel.getAuctionById(sanitizedAuctionId);
       if (!result) return res.status(404).json({ error: "Auction not found" });
       res.status(200).json(result);
     } catch (error) {
@@ -180,9 +203,12 @@ const auctionController = {
   },
   updateAuction: async (req, res) => {
     const { auctionId, bidAmount, userId, status } = req.body;
+    const sanitizedAuctionId = sanitizeUserInput(auctionId);
+    const sanitizedUserId = sanitizeUserInput(userId);
+    const sanitizedStatus = sanitizeUserInput(status);
 
     try {
-      await AuctionModel.updateAuctionBid(auctionId, bidAmount, userId, status);
+      await AuctionModel.updateAuctionBid(sanitizedAuctionId, bidAmount, sanitizedUserId, sanitizedStatus);
       res.status(200).json({ message: "Auction updated successfully!" });
     } catch (error) {
       res.status(500).json({ error });
@@ -191,6 +217,7 @@ const auctionController = {
 
   updateDutchPrice: async (req, res) => {
     const { auctionId, newPrice } = req.body;
+    const sanitizedAuctionId = sanitizeUserInput(auctionId);
 
     try {
       // Validate that newPrice is greater than 0
@@ -199,7 +226,7 @@ const auctionController = {
       }
 
       // Get auction to verify it's a Dutch auction
-      const auction = await AuctionModel.getAuctionById(auctionId);
+      const auction = await AuctionModel.getAuctionById(sanitizedAuctionId);
       if (!auction) {
         return res.status(404).json({ error: "Auction not found" });
       }
@@ -212,7 +239,7 @@ const auctionController = {
 
       // Update the price
       const updated = await AuctionModel.updateDutchAuctionPrice(
-        auctionId,
+        sanitizedAuctionId,
         newPrice
       );
       if (!updated) {
@@ -221,10 +248,10 @@ const auctionController = {
 
       // Emit WebSocket event to all clients in the auction room
       const io = socketConfig.getIO();
-      const roomName = `auction_${auctionId}`;
+      const roomName = `auction_${sanitizedAuctionId}`;
       console.log(`Attempting to emit dutchPriceUpdate to room: ${roomName}`);
       console.log("Event data:", {
-        auctionId,
+        auctionId: sanitizedAuctionId,
         newPrice,
         timestamp: new Date().toISOString(),
       });
@@ -235,14 +262,14 @@ const auctionController = {
       console.log(`Number of clients in room ${roomName}: ${numClients}`);
 
       io.to(roomName).emit("dutchPriceUpdate", {
-        auctionId,
+        auctionId: sanitizedAuctionId,
         newPrice,
         timestamp: new Date().toISOString(),
       });
 
       res.status(200).json({
         message: "Dutch auction price updated successfully",
-        auctionId,
+        auctionId: sanitizedAuctionId,
         newPrice,
       });
     } catch (error) {
@@ -253,9 +280,11 @@ const auctionController = {
 
   acceptDutchPrice: async (req, res) => {
     const { auctionId, userId } = req.body;
+    const sanitizedAuctionId = sanitizeUserInput(auctionId);
+    const sanitizedUserId = sanitizeUserInput(userId);
     try {
       // Get auction to verify it's a Dutch auction
-      const auction = await AuctionModel.getAuctionById(auctionId);
+      const auction = await AuctionModel.getAuctionById(sanitizedAuctionId);
       if (!auction) {
         return res.status(404).json({ error: "Auction not found" });
       }
@@ -268,8 +297,8 @@ const auctionController = {
 
       // Accept the current price
       const success = await AuctionModel.acceptDutchAuctionPrice(
-        auctionId,
-        userId
+        sanitizedAuctionId,
+        sanitizedUserId
       );
       if (!success) {
         return res
@@ -278,20 +307,20 @@ const auctionController = {
       }
 
       // Get the updated auction to get the final price
-      const updatedAuction = await AuctionModel.getAuctionById(auctionId);
+      const updatedAuction = await AuctionModel.getAuctionById(sanitizedAuctionId);
 
       // Notify all clients in the auction room
       const io = socketConfig.getIO();
-      io.to(`auction_${auctionId}`).emit("auctionEnded", {
-        auctionId,
-        winner: userId,
+      io.to(`auction_${sanitizedAuctionId}`).emit("auctionEnded", {
+        auctionId: sanitizedAuctionId,
+        winner: sanitizedUserId,
         finalPrice: updatedAuction.final_price,
         message: "Dutch auction ended - Current price accepted",
       });
 
       res.status(200).json({
         message: "Dutch auction price accepted successfully",
-        auctionId,
+        auctionId: sanitizedAuctionId,
         finalPrice: updatedAuction.final_price,
       });
     } catch (error) {
@@ -302,12 +331,12 @@ const auctionController = {
 
   getUserAuctionWinnings: async (req, res) => {
     const { userId } = req.params;
-
-    if (!userId) {
+    const sanitizedUserId = sanitizedUserId(userId);
+    if (!sanitizedUserId) {
       return res.status(400).json({ error: "UserId is null" });
     }
     try {
-      const rows = await AuctionModel.getAuctionWinnings(userId);
+      const rows = await AuctionModel.getAuctionWinnings(sanitizedUserId);
       return res.status(200).json(rows);
     } catch (error) {
       console.error("Error getting Auction Winnings:", error);
@@ -325,6 +354,15 @@ const auctionController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+   getSellerDutchAuctions: async (req, res) => {
+    const { userId } = req.params;
+    try {
+      const auctions = await AuctionModel.getUserDutchAuctions(userId);
+      return res.status(200).json(auctions);
+  } catch (error) {
+     return res.status(500).json({ error });
+  }
+  }
 };
 
 const formatForMySQL = (isoString) => {

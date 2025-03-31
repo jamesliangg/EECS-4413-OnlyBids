@@ -87,7 +87,7 @@ const AuctionModel = {
   // Update Dutch auction price
   updateDutchAuctionPrice: async (auctionId, newPrice) => {
     const [result] = await db.query(
-      "UPDATE Auction SET final_price = ? WHERE auction_id = ? AND type = 'dutch' AND status = 'ongoing'",
+      "UPDATE Item SET starting_price = ? WHERE item_id = (SELECT item_id FROM Auction WHERE auction_id = ? AND type = 'dutch' AND status = 'ongoing')",
       [newPrice, auctionId]
     );
     return result.affectedRows > 0;
@@ -125,6 +125,18 @@ const AuctionModel = {
       throw error;
     }
   },
+
+  getUserDutchAuctions: async (user_id) => {
+    const query = `
+        SELECT a.*, i.*
+        FROM Auction a
+        JOIN Item i ON a.item_id = i.item_id
+        WHERE i.seller_id = ? AND a.type = 'dutch' AND a.status = 'ongoing'`;
+
+    const [rows] = await db.execute(query, [user_id]);
+    return rows;
+}
+
 };
 
 module.exports = AuctionModel;

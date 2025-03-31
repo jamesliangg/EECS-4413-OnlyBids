@@ -11,22 +11,21 @@ function DutchBidding() {
   const auction = location.state?.auction;
   console.log("auction");
 
-  const [auctionId, setAuctionId] = useState("");
-  // const [userId, setUserId] = useState("")
-  const [currentPrice, setCurrentPrice] = useState(null);
-  const [message, setMessage] = useState("");
-  const [socket, setSocket] = useState(null);
-  const [winner, setWinner] = useState(null);
-  const [isBid, setIsBid] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [completedMessage, setCompletedMessage] = useState("");
-
-  const shippingPrice = "22";
-  useEffect(() => {
-    setAuctionId(auction?.auction_id);
-    setIsBid(auction?.winner_id === userID);
-    setIsCompleted(auction?.winner_id === userID);
-  }, []);
+  const [auctionId, setAuctionId] = useState("")
+ // const [userId, setUserId] = useState("")
+  const [currentPrice, setCurrentPrice] = useState(null)
+  const [message, setMessage] = useState("")
+  const [socket, setSocket] = useState(null)
+  const [winner, setWinner] = useState(null)
+  const [isBid, setIsBid] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [completedMessage, setCompletedMessage] = useState("")
+  const [isExpedited, setIsExpedited] = useState(false);
+  const shippingPrice = "22"
+    useEffect(() => {
+      setAuctionId(auction?.auction_id)
+      setIsCompleted(auction?.winner_id === userID)
+    }, [])
 
   useEffect(() => {
     if (!auctionId) return; // only connect if have an auctionId
@@ -66,11 +65,8 @@ function DutchBidding() {
     };
   }, [auctionId]);
   const handlePayment = () => {
-    if (userID != winner) {
-      setMessage("You cannot Pay! You are not the winner");
-    }
-    navigate("/payment", { state: { auction_id: auctionId, user_id: userID } });
-  };
+    navigate("/payment",{state: {auction_id: auctionId, user_id: userID}});
+  }
 
   const handleBuyNow = (e) => {
     setMessage("");
@@ -126,30 +122,32 @@ function DutchBidding() {
             bg-blue-600 hover:bg-blue-700 text-white 
             px-4 py-2 rounded w-full transition-colors
           "
-            onClick={() => {
-              handleBuyNow();
-            }}
-          >
-            Place Bid
-          </button>
-        )}
+          onClick={() => {handleBuyNow()}}
+        >
+          Place Bid
+        </button>)}
         {isBid && (
-          <button
-            type="submit"
-            className="
-            bg-blue-600 hover:bg-blue-700 text-white 
-            px-4 py-2 rounded w-full transition-colors
-          "
-            onClick={() => {
-              handlePayment();
-            }}
-          >
-            Pay Now
-          </button>
+          <div className="mt-4">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={isExpedited}
+                onChange={() => setIsExpedited(!isExpedited)}
+                className="form-checkbox"
+              />
+              <span className="text-gray-700">Expedited Shipping (+$10)</span>
+            </label>
+            <button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full transition-colors mt-4"
+              onClick={handlePayment}
+            >
+              Pay Now
+            </button>
+          </div>
         )}
-      </div>
     </div>
   );
 }
 
-export default DutchBidding;
+export default DutchBidding
