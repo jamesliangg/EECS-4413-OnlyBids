@@ -75,6 +75,15 @@ const AuctionModel = {
     return result;
   },
 
+  // Get auction final price and shipping with/without expedited
+  getAuctionFinalPrice: async (auctionId) => {
+    const [result] = await db.query(
+      "SELECT final_price, shipping_price, expedited_price FROM Auction WHERE auction_id = ?",
+      [auctionId]
+    );
+    return result;
+  },
+
   // Update Dutch auction price
   updateDutchAuctionPrice: async (auctionId, newPrice) => {
     const [result] = await db.query(
@@ -109,14 +118,13 @@ const AuctionModel = {
       WHERE a.winner_id = ? AND a.status = 'completed'
     `;
     try {
-        const [result] = await db.query(query, [userId]);
-        return result;
+      const [result] = await db.query(query, [userId]);
+      return result;
     } catch (error) {
-        console.error("Error fetching auction winnings:", error);
-        throw error;
+      console.error("Error fetching auction winnings:", error);
+      throw error;
     }
-}
-
+  },
 };
 
 module.exports = AuctionModel;

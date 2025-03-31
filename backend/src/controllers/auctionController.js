@@ -13,12 +13,10 @@ const auctionController = {
 
       // Ensure this is a forward auction
       if (auction.type !== "forward") {
-        return res
-          .status(400)
-          .json({
-            error:
-              "This is not a forward auction. For Dutch auctions, use acceptDutchPrice endpoint.",
-          });
+        return res.status(400).json({
+          error:
+            "This is not a forward auction. For Dutch auctions, use acceptDutchPrice endpoint.",
+        });
       }
 
       const currentPrice = auction.final_price || 0;
@@ -100,15 +98,16 @@ const auctionController = {
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       return res.status(400).json({
-        error: "Invalid date format. Expected ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)",
+        error:
+          "Invalid date format. Expected ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)",
       });
     }
 
     // Validate that start time is not in the past
     //if (startDate < currentDate) {
-      //return res.status(400).json({
-        //error: "Start time cannot be in the past",
-      //});
+    //return res.status(400).json({
+    //error: "Start time cannot be in the past",
+    //});
     //}
 
     if (endDate <= startDate) {
@@ -304,22 +303,33 @@ const auctionController = {
   getUserAuctionWinnings: async (req, res) => {
     const { userId } = req.params;
 
-    if(!userId) {
-      return res.status(400).json({error: "UserId is null"});
+    if (!userId) {
+      return res.status(400).json({ error: "UserId is null" });
     }
-    try{
+    try {
       const rows = await AuctionModel.getAuctionWinnings(userId);
-      return res.status(200).json(rows)
+      return res.status(200).json(rows);
     } catch (error) {
       console.error("Error getting Auction Winnings:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
-  }
+  },
+
+  getAuctionFinalPrice: async (req, res) => {
+    const { auctionId } = req.params;
+    try {
+      const result = await AuctionModel.getAuctionFinalPrice(auctionId);
+      if (!result) return res.status(404).json({ error: "Prices not found" });
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
 };
 
 const formatForMySQL = (isoString) => {
   const date = new Date(isoString);
-  return date.toISOString().replace('T', ' ').replace(/\..+/, '');
+  return date.toISOString().replace("T", " ").replace(/\..+/, "");
   // "2025-03-25T01:50:07.452Z" → "2025-03-25 01:50:07"
 };
 module.exports = auctionController;

@@ -1,62 +1,81 @@
-import React, { useState, useRef } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 //removes any non-digit characters
 //set max length
 function DigitsOnly(e, setter, maxLen) {
-  let val = e.target.value.replace(/\D/g, "") // remove all non-digits
+  let val = e.target.value.replace(/\D/g, ""); // remove all non-digits
   if (maxLen && val.length > maxLen) {
-    val = val.slice(0, maxLen)
+    val = val.slice(0, maxLen);
   }
-  setter(val)
+  setter(val);
 }
 
 function Payment() {
   // default shipping address for illustration
-  const [shippingAddress] = useState("4700 Keele St, North York, ON M3J 1P3")
+  const [shippingAddress] = useState("4700 Keele St, North York, ON M3J 1P3");
 
-  const {auction_id, user_id} = useLocation().state;
+  const { auction_id, user_id } = useLocation().state;
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardholder, setCardholder] = useState("");
+  const [expireMM, setExpireMM] = useState("");
+  const [expireYY, setExpireYY] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [message, setMessage] = useState("");
+  const [prices, setPrices] = useState("");
+  const [error, setError] = useState(null);
 
-  const [cardNumber, setCardNumber] = useState("")
-  const [cardholder, setCardholder] = useState("")
-  const [expireMM, setExpireMM] = useState("")
-  const [expireYY, setExpireYY] = useState("")
-  const [cvv, setCvv] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [message, setMessage] = useState("")
+  useEffect(() => {
+    fetch(`http://localhost:3000/api/auction/final-price/${auction_id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setPrices(data[0]);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Error fetching prices");
+      });
+  }, [auction_id]);
 
   // refs for jumping from MM to YY
-  const mmRef = useRef(null)
-  const yyRef = useRef(null)
+  const mmRef = useRef(null);
+  const yyRef = useRef(null);
 
   // React Router hook for navigation
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // after 2 digits, jump to YY
   const handleMMChange = (e) => {
-    DigitsOnly(e, setExpireMM, 2)
+    DigitsOnly(e, setExpireMM, 2);
     if (e.target.value.replace(/\D/g, "").length === 2) {
-      yyRef.current.focus()
+      yyRef.current.focus();
     }
-  }
+  };
 
   const handleYYChange = (e) => {
-    DigitsOnly(e, setExpireYY, 2)
-  }
+    DigitsOnly(e, setExpireYY, 2);
+  };
 
   const handlePayment = (e) => {
-    e.preventDefault()
-    setMessage("")
+    e.preventDefault();
+    setMessage("");
 
-   const paymentData = {
+    const paymentData = {
       auction_id,
-      user_id,
+      buyer_id: user_id,
       isExpedited: false,
-      cardNumber,
+      cardNum: cardNumber,
       cardholder,
       expDate: `${expireMM}/${expireYY}`,
       cvv,
-    }
+    };
 
     fetch("http://localhost:3000/api/payment/pay", {
       method: "POST",
@@ -66,23 +85,37 @@ function Payment() {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          setMessage(`Error: ${data.error}`)
+          setMessage(`Error: ${data.error}`);
         } else {
-          setMessage(data.message || "Payment successful!")
-          navigate("/receipt")
+          setMessage(data.message || "Payment successful!");
+          navigate("/receipt", {
+            state: { auction_id, user_id },
+          });
         }
       })
       .catch((err) => {
-        console.error(err)
-        setMessage("Payment error.")
-        navigate("/receipt") // This is for demonstration
-      })
-  }
+        console.error(err);
+        setMessage("Payment error.");
+        navigate("/receipt"); // This is for demonstration
+      });
+  };
 
   return (
     <div className="bg-blue-50 min-h-screen flex items-center justify-center">
-      <div className="bg-white p-8 shadow-md rounded w-full max-w-md">
+      <div className="bg-white p-2 shadow-md rounded w-full max-w-md">
         <h1 className="text-2xl font-bold mb-4 text-center">Payment</h1>
+
+        <div className="bg-white p-8 mb-4 shadow-md rounded w-80% max-w-md">
+          <h2 className="font-semibold">Payment Details</h2>
+          <br />
+          <p>Subtotal: {parseFloat(prices.final_price)}</p>
+          <p>Shipping: {parseFloat(prices.shipping_price)}</p>
+          <h3 className="font-semibold">
+            Total:{" "}
+            {parseFloat(prices.final_price) + parseFloat(prices.shipping_price)}
+          </h3>
+        </div>
+
         {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
 
         {/* Display default shipping address */}
@@ -138,7 +171,7 @@ function Payment() {
             <input
               className="border p-2 w-full rounded"
               value={cvv}
-              onChange={(e) => DigitsOnly(e, setCvv, 4)}
+              onChange={(e) => DigitsOnly(e, setCvv, 3)}
               required
             />
           </div>
@@ -163,7 +196,7 @@ function Payment() {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default Payment
+export default Payment;
