@@ -7,6 +7,8 @@ function Winnings() {
   const [winnings, setWinnings] = useState([]);
   const [error, setError] = useState("");
   const [paymentMessage, setPaymentMessage] = useState("");
+  const [isExpedited, setIsExpedited] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,7 +30,7 @@ function Winnings() {
   }, [userID]);
 
   const handlePayment = (auctionId) => {
-    navigate("/payment", { state: { auction_id: auctionId, user_id: userID } });
+    navigate("/payment", { state: { auction_id: auctionId, user_id: userID, is_expedited: isExpedited } });
   };
 
   return (
@@ -47,6 +49,15 @@ function Winnings() {
                   <h2 className="text-lg font-semibold">{item.name}</h2>
                   <p className="text-gray-700">{item.description}</p>
                 </div>
+                <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={isExpedited}
+                onChange={() => setIsExpedited(!isExpedited)}
+                className="form-checkbox"
+              />
+              <span className="text-gray-700">Expedited Shipping (+$10)</span>
+            </label>
                 <button
                   onClick={() => handlePayment(item.auction_id)}
                   className="ml-4 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"

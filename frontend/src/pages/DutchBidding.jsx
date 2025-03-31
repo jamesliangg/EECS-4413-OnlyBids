@@ -20,11 +20,10 @@ function DutchBidding() {
   const [isBid, setIsBid] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
   const [completedMessage, setCompletedMessage] = useState("")
-  
+  const [isExpedited, setIsExpedited] = useState(false);
   const shippingPrice = "22"
     useEffect(() => {
       setAuctionId(auction?.auction_id)
-      setIsBid(auction?.winner_id === userID);
       setIsCompleted(auction?.winner_id === userID)
     }, [])
 
@@ -64,9 +63,6 @@ function DutchBidding() {
     }
   }, [auctionId])
   const handlePayment = () => {
-    if(userID != highestBidder) {
-      setMessage("You cannot Pay! You are not the highest bidder")
-    }
     navigate("/payment",{state: {auction_id: auctionId, user_id: userID}});
   }
 
@@ -126,16 +122,26 @@ function DutchBidding() {
         >
           Place Bid
         </button>)}
-        {isBid && (<button
-          type="submit"
-          className="
-            bg-blue-600 hover:bg-blue-700 text-white 
-            px-4 py-2 rounded w-full transition-colors
-          "
-          onClick={() => {handlePayment()}}
-        >
-          Pay Now
-        </button>)}
+        {isBid && (
+          <div className="mt-4">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={isExpedited}
+                onChange={() => setIsExpedited(!isExpedited)}
+                className="form-checkbox"
+              />
+              <span className="text-gray-700">Expedited Shipping (+$10)</span>
+            </label>
+            <button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full transition-colors mt-4"
+              onClick={handlePayment}
+            >
+              Pay Now
+            </button>
+          </div>
+        )}
     </div>
 
   </div>

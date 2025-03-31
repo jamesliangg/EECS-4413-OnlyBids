@@ -20,6 +20,7 @@ function ForwardBidding() {
   const [isHighestBidder, setisHighestBidder] = useState(false);
   const [notWinningBidder, setNotWinningBidder] = useState(false);
   const [auctionEnded, setAuctionEnded] = useState(false);
+  const [isExpedited, setIsExpedited] = useState(false);
 
   const formatFromMySQL = (mysqlDatetime) => {
     if (!mysqlDatetime) return null;
@@ -107,7 +108,7 @@ function ForwardBidding() {
       setMessage("You cannot Pay! You are not the highest bidder!!");
       return;
     }
-    navigate("/payment",{state: {auction_id: auctionId, user_id: userID}});
+    navigate("/payment",{state: {auction_id: auctionId, user_id: userID, is_expedited: isExpedited}});
   }
 
   return (
@@ -166,17 +167,29 @@ function ForwardBidding() {
           <div className="text-red text-center font-bold">Auction Over!</div>
         )}
 
-        {auctionEnded && userID === highestBidder && (
-          <button
-            className="
-              bg-green-600 hover:bg-green-700 text-white 
-              px-4 py-2 rounded w-full transition-colors
-            "
-            onClick={handlePayment}
-          >
-            Pay Now
-          </button>
-        )}
+{auctionEnded && userID === highestBidder && (
+  <div className="mt-4">
+    <label className="flex items-center space-x-2">
+      <input
+        type="checkbox"
+        checked={isExpedited}
+        onChange={() => setIsExpedited(!isExpedited)}
+        className="form-checkbox"
+      />
+      <span className="text-gray-700">Expedited Shipping (+$10)</span>
+    </label>
+
+    <button
+      className="
+        bg-green-600 hover:bg-green-700 text-white 
+        px-4 py-2 rounded w-full transition-colors mt-4
+      "
+      onClick={handlePayment}
+    >
+      Pay Now
+    </button>
+  </div>
+)}
       </div>
     </div>
   );
