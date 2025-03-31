@@ -12,10 +12,10 @@ function DigitsOnly(e, setter, maxLen) {
 }
 
 function Payment() {
-  // default shipping address for illustration
-  const [shippingAddress] = useState("4700 Keele St, North York, ON M3J 1P3");
-
   const { auction_id, user_id } = useLocation().state;
+  const [shippingAddress, setShippingAddress] = useState(
+    "4700 Keele St, North York, ON M3J 1P3"
+  );
   const [cardNumber, setCardNumber] = useState("");
   const [cardholder, setCardholder] = useState("");
   const [expireMM, setExpireMM] = useState("");
@@ -24,8 +24,10 @@ function Payment() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [message, setMessage] = useState("");
   const [prices, setPrices] = useState("");
+  const [address, setAddress] = useState("");
   const [error, setError] = useState(null);
 
+  // Get the prices of the auction
   useEffect(() => {
     fetch(`http://localhost:3000/api/auction/final-price/${auction_id}`, {
       method: "GET",
@@ -43,6 +45,33 @@ function Payment() {
         setError("Error fetching prices");
       });
   }, [auction_id]);
+
+  //Get winning user address
+  useEffect(() => {
+    fetch(`http://localhost:3000/api/user/${user_id}/address`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setAddress(
+          data[0].street +
+            ", " +
+            data[0].city +
+            ", " +
+            data[0].state +
+            " " +
+            data[0].postal_code
+        );
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Error fetching prices");
+      });
+  }, [user_id]);
 
   // refs for jumping from MM to YY
   const mmRef = useRef(null);

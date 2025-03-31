@@ -5,21 +5,25 @@ const xss = require('xss');
 
 // Validates that a password only contains alphanumeric and specific special characters
 const isValidPassword = (password) => {
-    // Check if password contains only alphanumeric and allowed special characters
-    // Regex that allows only ASCII alphanumeric and these specific special characters: !@#$%^&*()
-    const validPasswordRegex = /^[A-Za-z0-9!@#$%^&*()]+$/;
-    
-    // Check for spaces
-    if (password.includes(' ')) {
-        return { valid: false, reason: 'Password cannot contain spaces' };
-    }
-    
-    // Check if password matches the valid pattern
-    if (!validPasswordRegex.test(password)) {
-        return { valid: false, reason: 'Password can only contain alphanumeric characters and these special characters: !@#$%^&*()' };
-    }
-    
-    return { valid: true };
+  // Check if password contains only alphanumeric and allowed special characters
+  // Regex that allows only ASCII alphanumeric and these specific special characters: !@#$%^&*()
+  const validPasswordRegex = /^[A-Za-z0-9!@#$%^&*()]+$/;
+
+  // Check for spaces
+  if (password.includes(" ")) {
+    return { valid: false, reason: "Password cannot contain spaces" };
+  }
+
+  // Check if password matches the valid pattern
+  if (!validPasswordRegex.test(password)) {
+    return {
+      valid: false,
+      reason:
+        "Password can only contain alphanumeric characters and these special characters: !@#$%^&*()",
+    };
+  }
+
+  return { valid: true };
 };
 
 // Sanitize user input
@@ -261,7 +265,18 @@ const userController = {
             console.error('Reset password error:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
+    },
+  
+  findUserAddress: async (res, req) => {
+    const { userId } = req.params;
+    try {
+      const result = await UserModel.findUserAddressById(userId);
+      if (!result) return res.status(404).json({ error: "User not found" });
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
     }
+  },
 };
 
 module.exports = userController;

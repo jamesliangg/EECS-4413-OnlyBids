@@ -1,17 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userController = require('../controllers/userController');
+const userController = require("../controllers/userController");
 
 // Signup route (POST)
-router.post('/signup', userController.signup);
+router.post("/signup", userController.signup);
 
 // Signin route (POST)
-router.post('/signin', userController.signin);
+router.post("/signin", userController.signin);
 
 // Request password reset route (POST)
-router.post('/request-reset', userController.requestReset);
+router.post("/request-reset", userController.requestReset);
 
 // Reset password route (POST)
-router.post('/reset-password', userController.resetPassword);
+router.post("/reset-password", userController.resetPassword);
+
+// Getting user address (GET)
+router.post("/user/:userId/address");
 
 module.exports = router;
