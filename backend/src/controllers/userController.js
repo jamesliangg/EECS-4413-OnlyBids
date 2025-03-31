@@ -269,12 +269,13 @@ const userController = {
   
   findUserAddress: async (res, req) => {
     const { userId } = req.params;
+    const sanitizedUserId = sanitizeUserInput(userId);
     try {
-      const result = await UserModel.findUserAddressById(userId);
-      if (!result) return res.status(404).json({ error: "User not found" });
-      res.status(200).json(result);
+        const result = await UserModel.findUserAddressById(sanitizedUserId);
+        if (!result) return res.status(404).json({ error: "User not found" });
+        res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Internal server error" });
     }
   },
 };
