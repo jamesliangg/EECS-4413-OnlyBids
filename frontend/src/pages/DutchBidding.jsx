@@ -16,22 +16,22 @@ function DutchBidding() {
   const [currentPrice, setCurrentPrice] = useState(null)
   const [message, setMessage] = useState("")
   const [socket, setSocket] = useState(null)
+  const [winner, setWinner] = useState(null)
   const [isBid, setIsBid] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [completedMessage, setCompletedMessage] = useState("")
   
-
   const shippingPrice = "22"
     useEffect(() => {
       setAuctionId(auction?.auction_id)
-      isBid(auction?.winner_id === userID);
+      setIsBid(auction?.winner_id === userID);
+      setIsCompleted(auction?.winner_id === userID)
     }, [])
 
   useEffect(() => {
     if (!auctionId) return // only connect if have an auctionId
 
-    // Create a new socket connection
-    const newSocket = io({
-      // blabla
-    })
+     const newSocket = io("http://localhost:3000", { transports: ["websocket"] });
 
     // save socket to state
     setSocket(newSocket)
@@ -39,11 +39,24 @@ function DutchBidding() {
     // join the specific auction room
     newSocket.emit("joinAuction", auctionId)
 
+    newSocket.on("joinedAuction", (data) => {
+      console.log(`${data.roomName}-${userID}:Joined room`)
+    })
+
     // listen to the real-time price updates
-    newSocket.on("dutchPriceUpdate", (data) => {
-      if (data.auctionId === auctionId) {
-        setCurrentPrice(data.newPrice)
-      }
+    /*
+     io.to(`auction_${auctionId}`).emit("auctionEnded", {
+        auctionId,
+        winner: userId,
+        finalPrice: updatedAuction.final_price,
+        message: "Dutch auction ended - Current price accepted",
+      });
+    */
+    newSocket.on("auctionEnded", (data) => {
+      setWinner(data?.winner);
+      setCompletedMessage(data.message);
+      setIsBid(data?.winner === userID);
+      setIsCompleted(true)
     })
 
     return () => {
@@ -51,6 +64,9 @@ function DutchBidding() {
     }
   }, [auctionId])
   const handlePayment = () => {
+    if(userID != highestBidder) {
+      setMessage("You cannot Pay! You are not the highest bidder")
+    }
     navigate("/payment",{state: {auction_id: auctionId, user_id: userID}});
   }
 
@@ -99,7 +115,8 @@ function DutchBidding() {
 
       {/* Message Display */}
       {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
-      { !isBid && (<button
+      {!isBid && <p className="text-red-600 mb-4 text-center">{completedMessage}</p>}
+      { !isBid && !isCompleted && (<button
           type="submit"
           className="
             bg-blue-600 hover:bg-blue-700 text-white 
