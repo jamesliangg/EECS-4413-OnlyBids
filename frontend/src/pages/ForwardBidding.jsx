@@ -18,6 +18,9 @@ function ForwardBidding() {
   const [socket, setSocket] = useState(null);
   const shippingPrice = "22";
   const [isHighestBidder, setisHighestBidder] = useState(false);
+  const [notWinningBidder, setNotWinningBidder] = useState(false);
+  const [auctionEnded, setAuctionEnded] = useState(false);
+
   const formatFromMySQL = (mysqlDatetime) => {
     if (!mysqlDatetime) return null;
     // If it's already in ISO format, return as-is
@@ -33,14 +36,23 @@ function ForwardBidding() {
     setHighestBidder(auction?.winner_id);
 
     if (auction?.end_time) {
-      const auctionEndTime = new Date(
-        formatFromMySQL(auction?.end_time)
-      ).getTime();
-      setisHighestBidder(
-        Date.now() > auctionEndTime && auction?.winner_id == userID
-      );
+      const auctionEndTime = new Date(formatFromMySQL(auction?.end_time)).getTime()
+      setisHighestBidder(Date.now() > auctionEndTime && auction?.winner_id == userID)
+      setNotWinningBidder(Date.now() > auctionEndTime && auction?.winner_id != userID)
     }
-  }, [auction]);
+    
+    const auctionEndTime = new Date(formatFromMySQL(auction?.end_time)).getTime();
+    const checkAuctionEnd = () => {
+      if (Date.now() >= auctionEndTime) {
+        setAuctionEnded(true);
+        setMessage("Auction has ended!");
+      }
+    };
+
+    const interval = setInterval(checkAuctionEnd, 1000);
+
+    return () => clearInterval(interval);
+  }, [auction])
 
   useEffect(() => {
     if (!auctionId) return;
@@ -91,8 +103,12 @@ function ForwardBidding() {
       });
   };
   const handlePayment = () => {
-    navigate("/payment", { state: { auction_id: auctionId, user_id: userID } });
-  };
+    if(userID != highestBidder) {
+      setMessage("You cannot Pay! You are not the highest bidder!!");
+      return;
+    }
+    navigate("/payment",{state: {auction_id: auctionId, user_id: userID}});
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
@@ -111,11 +127,7 @@ function ForwardBidding() {
           <h2 className="text-lg font-semibold">Current Auction Status</h2>
           <p className="text-gray-700">
             <span className="font-semibold">Current Price:</span>{" "}
-            {highestBid !== null
-              ? `$${highestBid}`
-              : auction?.starting_price
-              ? `$${auction.starting_price}`
-              : "N/A"}
+            {highestBid !== null ? `$${highestBid}` : `$${auction?.starting_price}`}
           </p>
           <p className="text-gray-700">
             <span className="font-semibold">Highest Bidder:</span>{" "}
@@ -125,7 +137,7 @@ function ForwardBidding() {
 
         {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
 
-        {!isHighestBidder && (
+        {!auctionEnded && (
           <form className="space-y-4" onSubmit={handlePlaceBid}>
             <div>
               <label className="block mb-1 font-semibold">Enter Your Bid</label>
@@ -141,22 +153,26 @@ function ForwardBidding() {
             <button
               type="submit"
               className="
-              bg-blue-600 hover:bg-blue-700 text-white 
-              px-4 py-2 rounded w-full transition-colors
-            "
+                bg-blue-600 hover:bg-blue-700 text-white 
+                px-4 py-2 rounded w-full transition-colors
+              "
             >
               Place Bid
             </button>
           </form>
         )}
-        {isHighestBidder && (
+
+        {auctionEnded && (
+          <div className="text-red text-center font-bold">Auction Over!</div>
+        )}
+
+        {auctionEnded && userID === highestBidder && (
           <button
-            type="submit"
             className="
-              bg-blue-600 hover:bg-blue-700 text-white 
+              bg-green-600 hover:bg-green-700 text-white 
               px-4 py-2 rounded w-full transition-colors
             "
-            onClick={() => handlePayment()}
+            onClick={handlePayment}
           >
             Pay Now
           </button>

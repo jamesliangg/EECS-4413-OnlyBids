@@ -28,7 +28,7 @@ function Winnings() {
   }, [userID]);
 
   const handlePayment = (auctionId) => {
-    navigate("/payment", { state: { auctionId } });
+    navigate("/payment", { state: { auction_id: auctionId, user_id: userID } });
   };
 
   return (
