@@ -12,10 +12,8 @@ function DigitsOnly(e, setter, maxLen) {
 }
 
 function Payment() {
-  const { auction_id, user_id } = useLocation().state;
-  const [shippingAddressData, setShippingAddressData] = useState(
-    "4700 Keele St, North York, ON M3J 1P3"
-  );
+  const { auction_id, user_id, is_expedited } = useLocation().state;
+  const [shippingAddressData, setShippingAddressData] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardholder, setCardholder] = useState("");
   const [expireMM, setExpireMM] = useState("");
@@ -23,8 +21,9 @@ function Payment() {
   const [cvv, setCvv] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [message, setMessage] = useState("");
-  const [prices, setPrices] = useState("");
   const [finalPrice, setFinalPrice] = useState(0);
+  const [shippingPrice, setShippingPrice] = useState(0);
+  const [subtotal, setSubtotal] = useState(0);
   const [error, setError] = useState(null);
 
   // Get the prices of the auction
@@ -38,10 +37,23 @@ function Payment() {
       })
       .then((data) => {
         console.log(data);
-        setPrices(data[0]);
-        setFinalPrice(
-          parseFloat(data[0].final_price) + parseFloat(data[0].shipping_price)
-        );
+        setSubtotal(parseFloat(data[0].final_price));
+        if (is_expedited === false) {
+          setShippingPrice(parseFloat(data[0].shipping_price));
+          setFinalPrice(
+            parseFloat(data[0].final_price) + parseFloat(data[0].shipping_price)
+          );
+        } else {
+          setShippingPrice(
+            parseFloat(data[0].shipping_price) +
+              parseFloat(data[0].expedited_price)
+          );
+          setFinalPrice(
+            parseFloat(data[0].final_price) +
+              parseFloat(data[0].shipping_price) +
+              parseFloat(data[0].expedited_price)
+          );
+        }
       })
       .catch((err) => {
         console.error(err);
@@ -49,7 +61,7 @@ function Payment() {
       });
   }, [auction_id]);
 
-  //Get winning user address
+  //Get winning user data
   useEffect(() => {
     fetch(`http://localhost:3000/api/data/user/${user_id}`, {
       method: "GET",
@@ -114,7 +126,7 @@ function Payment() {
         } else {
           setMessage(data.message || "Payment successful!");
           navigate("/receipt", {
-            state: { auction_id, user_id, finalPrice },
+            state: { auction_id, user_id, final_price: finalPrice },
           });
         }
       })
@@ -133,9 +145,9 @@ function Payment() {
         <div className="bg-white p-8 mb-4 shadow-md rounded w-80% max-w-md">
           <h2 className="font-semibold">Payment Details</h2>
           <br />
-          <p>Subtotal: {parseFloat(prices.final_price)}</p>
-          <p>Shipping: {parseFloat(prices.shipping_price)}</p>
-          <h3 className="font-semibold">Total: {finalPrice}</h3>
+          <p>Subtotal: {subtotal.toFixed(2)}</p>
+          <p>Shipping: {shippingPrice.toFixed(2)}</p>
+          <h3 className="font-semibold">Total: {finalPrice.toFixed(2)}</h3>
         </div>
 
         {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}

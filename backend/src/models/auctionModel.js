@@ -135,8 +135,7 @@ const AuctionModel = {
 
     const [rows] = await db.execute(query, [user_id]);
     return rows;
-}
-
+  },
 };
 
 module.exports = AuctionModel;

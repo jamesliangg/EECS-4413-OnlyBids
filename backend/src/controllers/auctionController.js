@@ -1,16 +1,16 @@
 const AuctionModel = require("../models/auctionModel");
 const socketConfig = require("../config/socket");
 const ItemModel = require("../models/itemModel");
-const xss = require('xss');
+const xss = require("xss");
 
 // Sanitize user input
 const sanitizeUserInput = (input) => {
-    if (typeof input !== 'string') return input;
-    return xss(input, {
-        whiteList: {}, // Don't allow any HTML tags
-        stripIgnoreTag: true, // Strip HTML tags
-        stripIgnoreTagBody: ['script'] // Strip script tags and their content
-    });
+  if (typeof input !== "string") return input;
+  return xss(input, {
+    whiteList: {}, // Don't allow any HTML tags
+    stripIgnoreTag: true, // Strip HTML tags
+    stripIgnoreTagBody: ["script"], // Strip script tags and their content
+  });
 };
 
 const auctionController = {
@@ -208,7 +208,12 @@ const auctionController = {
     const sanitizedStatus = sanitizeUserInput(status);
 
     try {
-      await AuctionModel.updateAuctionBid(sanitizedAuctionId, bidAmount, sanitizedUserId, sanitizedStatus);
+      await AuctionModel.updateAuctionBid(
+        sanitizedAuctionId,
+        bidAmount,
+        sanitizedUserId,
+        sanitizedStatus
+      );
       res.status(200).json({ message: "Auction updated successfully!" });
     } catch (error) {
       res.status(500).json({ error });
@@ -307,7 +312,9 @@ const auctionController = {
       }
 
       // Get the updated auction to get the final price
-      const updatedAuction = await AuctionModel.getAuctionById(sanitizedAuctionId);
+      const updatedAuction = await AuctionModel.getAuctionById(
+        sanitizedAuctionId
+      );
 
       // Notify all clients in the auction room
       const io = socketConfig.getIO();
@@ -331,7 +338,7 @@ const auctionController = {
 
   getUserAuctionWinnings: async (req, res) => {
     const { userId } = req.params;
-    const sanitizedUserId = sanitizedUserId(userId);
+    const sanitizedUserId = sanitizeUserInput(userId);
     if (!sanitizedUserId) {
       return res.status(400).json({ error: "UserId is null" });
     }
@@ -354,15 +361,16 @@ const auctionController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
-   getSellerDutchAuctions: async (req, res) => {
+
+  getSellerDutchAuctions: async (req, res) => {
     const { userId } = req.params;
     try {
       const auctions = await AuctionModel.getUserDutchAuctions(userId);
       return res.status(200).json(auctions);
-  } catch (error) {
-     return res.status(500).json({ error });
-  }
-  }
+    } catch (error) {
+      return res.status(500).json({ error });
+    }
+  },
 };
 
 const formatForMySQL = (isoString) => {

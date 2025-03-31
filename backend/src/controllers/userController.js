@@ -72,12 +72,10 @@ const userController = {
         !sanitizedSecurityQuestion ||
         !sanitizedSecurityAnswer
       ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Email, password, username, security question, and security answer are required",
-          });
+        return res.status(400).json({
+          error:
+            "Email, password, username, security question, and security answer are required",
+        });
       }
 
       // Validate email format
@@ -262,11 +260,9 @@ const userController = {
 
       // Validate required fields
       if (!sanitizedEmail || !sanitizedSecurityAnswer || !new_password) {
-        return res
-          .status(400)
-          .json({
-            error: "Email, security answer, and new password are required",
-          });
+        return res.status(400).json({
+          error: "Email, security answer, and new password are required",
+        });
       }
 
       // Validate email format
@@ -315,11 +311,11 @@ const userController = {
     }
   },
 
-  findUserAddress: async (res, req) => {
+  findUserData: async (req, res) => {
     const { userId } = req.params;
     const sanitizedUserId = sanitizeUserInput(userId);
     try {
-      const result = await UserModel.findUserAddressById(sanitizedUserId);
+      const result = await UserModel.findUserDataById(sanitizedUserId);
       if (!result) return res.status(404).json({ error: "User not found" });
       res.status(200).json(result);
     } catch (error) {
