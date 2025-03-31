@@ -286,10 +286,11 @@ const userController = {
     }
   },
 
-  findUserAddress: async (res, req) => {
+  // Find user data by userId
+  findUserData: async (req, res) => {
     const { userId } = req.params;
     try {
-      const result = await UserModel.findUserAddressById(userId);
+      const result = await UserModel.findUserDataById(userId);
       if (!result) return res.status(404).json({ error: "User not found" });
       res.status(200).json(result);
     } catch (error) {

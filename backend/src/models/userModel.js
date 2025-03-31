@@ -68,9 +68,9 @@ const UserModel = {
     return { verified: false };
   },
 
-  findUserAddressById: async (userId) => {
+  findUserDataById: async (userId) => {
     const [result] = await db.query(
-      "SELECT street, city, state, postal_code, country FROM User WHERE user_id = ?",
+      "SELECT username, email, street, city, state, postal_code, country FROM User WHERE user_id = ?",
       [userId]
     );
     return result;

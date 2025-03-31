@@ -1,42 +1,53 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 function Receipt() {
   const { auction_id, user_id } = useLocation().state;
-  const { paymentId } = useParams();
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [amountPaid, setAmountPaid] = useState(null);
-  const [shippingDays, setShippingDays] = useState(null);
+  const [amountPaid, setAmountPaid] = useState(0);
+  const [shippingDays] = useState(14);
+  const [userData, setUserData] = useState("");
 
+  // Get the prices of the auction
   useEffect(() => {
-    if (!paymentId) return;
-
-    setLoading(true);
-
-    // illustration example
-    fetch("/api/payment/receipt?paymentId=${paymentId}")
+    fetch(`http://localhost:3000/api/auction/final-price/${auction_id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch receipt info");
-        }
         return res.json();
       })
       .then((data) => {
-        if (data.error) {
-          setError(data.error);
-        } else {
-          setAmountPaid(data.amountPaid);
-          setShippingDays(data.shippingDays);
-        }
+        console.log(data);
+        setAmountPaid(
+          parseFloat(data[0].final_price) + parseFloat(data[0].shipping_price)
+        );
       })
       .catch((err) => {
         console.error(err);
-        setError("Server error while fetching receipt data.");
+        setError("Error fetching user data");
+      });
+  }, [auction_id]);
+
+  //Get winning user info
+  useEffect(() => {
+    fetch(`http://localhost:3000/api/data/user/${user_id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => {
+        return res.json();
       })
-      .finally(() => setLoading(false));
-  }, [paymentId]);
+      .then((data) => {
+        console.log(data);
+        setUserData(data);
+      })
+      .catch((err) => {
+        console.log("User ID", user_id);
+        console.error(err);
+        setError("Error fetching user data");
+      });
+  }, [user_id]);
 
   return (
     <div className="bg-blue-50 min-h-screen flex items-center justify-center">

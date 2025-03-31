@@ -13,7 +13,7 @@ function DigitsOnly(e, setter, maxLen) {
 
 function Payment() {
   const { auction_id, user_id } = useLocation().state;
-  const [shippingAddress, setShippingAddress] = useState(
+  const [shippingAddressData, setShippingAddressData] = useState(
     "4700 Keele St, North York, ON M3J 1P3"
   );
   const [cardNumber, setCardNumber] = useState("");
@@ -24,7 +24,7 @@ function Payment() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [message, setMessage] = useState("");
   const [prices, setPrices] = useState("");
-  const [address, setAddress] = useState("");
+  const [finalPrice, setFinalPrice] = useState(0);
   const [error, setError] = useState(null);
 
   // Get the prices of the auction
@@ -39,6 +39,9 @@ function Payment() {
       .then((data) => {
         console.log(data);
         setPrices(data[0]);
+        setFinalPrice(
+          parseFloat(data[0].final_price) + parseFloat(data[0].shipping_price)
+        );
       })
       .catch((err) => {
         console.error(err);
@@ -48,7 +51,7 @@ function Payment() {
 
   //Get winning user address
   useEffect(() => {
-    fetch(`http://localhost:3000/api/user/${user_id}/address`, {
+    fetch(`http://localhost:3000/api/data/user/${user_id}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
@@ -57,19 +60,12 @@ function Payment() {
       })
       .then((data) => {
         console.log(data);
-        setAddress(
-          data[0].street +
-            ", " +
-            data[0].city +
-            ", " +
-            data[0].state +
-            " " +
-            data[0].postal_code
-        );
+        setShippingAddressData(data[0]);
       })
       .catch((err) => {
         console.error(err);
-        setError("Error fetching prices");
+        console.log("User ID", user_id);
+        setError("Error fetching address");
       });
   }, [user_id]);
 
@@ -118,7 +114,7 @@ function Payment() {
         } else {
           setMessage(data.message || "Payment successful!");
           navigate("/receipt", {
-            state: { auction_id, user_id },
+            state: { auction_id, user_id, finalPrice },
           });
         }
       })
@@ -139,10 +135,7 @@ function Payment() {
           <br />
           <p>Subtotal: {parseFloat(prices.final_price)}</p>
           <p>Shipping: {parseFloat(prices.shipping_price)}</p>
-          <h3 className="font-semibold">
-            Total:{" "}
-            {parseFloat(prices.final_price) + parseFloat(prices.shipping_price)}
-          </h3>
+          <h3 className="font-semibold">Total: {finalPrice}</h3>
         </div>
 
         {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
@@ -150,7 +143,10 @@ function Payment() {
         {/* Display default shipping address */}
         <div className="mb-4">
           <h2 className="font-semibold">Shipping Address</h2>
-          <p>{shippingAddress}</p>
+          <p>
+            {shippingAddressData.street}, {shippingAddressData.city},{" "}
+            {shippingAddressData.state} {shippingAddressData.postal_code}
+          </p>
         </div>
 
         <form onSubmit={handlePayment} className="space-y-4">

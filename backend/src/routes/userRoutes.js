@@ -14,7 +14,7 @@ router.post("/request-reset", userController.requestReset);
 // Reset password route (POST)
 router.post("/reset-password", userController.resetPassword);
 
-// Getting user address (GET)
-router.post("/user/:userId/address");
+// Getting user data (GET)
+router.get("/data/user/:userId", userController.findUserData);
 
 module.exports = router;
