@@ -331,12 +331,12 @@ const auctionController = {
 
   getUserAuctionWinnings: async (req, res) => {
     const { userId } = req.params;
-
-    if (!userId) {
+    const sanitizedUserId = sanitizedUserId(userId);
+    if (!sanitizedUserId) {
       return res.status(400).json({ error: "UserId is null" });
     }
     try {
-      const rows = await AuctionModel.getAuctionWinnings(userId);
+      const rows = await AuctionModel.getAuctionWinnings(sanitizedUserId);
       return res.status(200).json(rows);
     } catch (error) {
       console.error("Error getting Auction Winnings:", error);
@@ -354,6 +354,15 @@ const auctionController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+   getSellerDutchAuctions: async (req, res) => {
+    const { userId } = req.params;
+    try {
+      const auctions = await AuctionModel.getUserDutchAuctions(userId);
+      return res.status(200).json(auctions);
+  } catch (error) {
+     return res.status(500).json({ error });
+  }
+  }
 };
 
 const formatForMySQL = (isoString) => {

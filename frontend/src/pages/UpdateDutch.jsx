@@ -1,109 +1,106 @@
-import React, { useState, useEffect } from "react"
-import { io } from "socket.io-client"
+import { useState, useEffect } from "react";
+import { useUser } from "@/context/UserContext";
 
-function UpdateDutch() {
-  const [auctionId, setAuctionId] = useState("")
-  const [newPrice, setNewPrice] = useState("")
-  const [currentPrice, setCurrentPrice] = useState(null)
-  const [socket, setSocket] = useState(null)
-  const [message, setMessage] = useState("")
+const UpdateDutch = () => {
+    const { userID } = useUser();
+    const [auctions, setAuctions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [priceInputs, setPriceInputs] = useState({});
+    const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    if (!auctionId) return
+    // Fetch Dutch auctions
+    useEffect(() => {
+        const fetchAuctions = async () => {
+            try {
+                if (!userID) {
+                    setError("User must sign in!");
+                    return;
+                }
+                const response = await fetch(`http://localhost:3000/api/auction/seller/dutch/${userID}`);
+                const data = await response.json();
+                setAuctions(data);
+            } catch (err) {
+                setError("Failed to load auctions.");
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    // Create a new socket connection
-    const newSocket = io({
-      // blabla
-    })
+        fetchAuctions();
+    }, [userID]);
 
-    setSocket(newSocket)
-    newSocket.emit("joinAuction", auctionId)
-    newSocket.on("dutchPriceUpdate", (data) => {
-      if (data.auctionId === auctionId) {
-        setCurrentPrice(data.newPrice)
-      }
-    })
+    // Handle price input change
+    const handleInputChange = (auctionId, value) => {
+        setPriceInputs({ ...priceInputs, [auctionId]: value });
+    };
 
-    return () => {
-      newSocket.disconnect()
-    }
-  }, [auctionId])
+    // Update Dutch auction price
+    const handleUpdatePrice = async (auctionId) => {
+        const newPrice = priceInputs[auctionId];
+        if (!newPrice || isNaN(newPrice) || newPrice <= 0) {
+          setError("Invalid price!");
+          return;
+        }
 
-  // PUT request to update the price
-  const handleUpdate = (e) => {
-    e.preventDefault()
-    setMessage("")
+        try {
+            const response = await fetch("http://localhost:3000/api/auction/dutch/price", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ auctionId, newPrice }),
+            });
 
-    fetch("/api/auction/dutch/price", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ auctionId, newPrice }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) setMessage(`Error: ${data.error}`)
-        else setMessage(data.message || "The price has been updated!")
-      })
-      .catch((err) => {
-        console.error(err)
-        setMessage("An error occured in updating Dutch price.")
-      })
-  }
+            if (!response.ok) {
+                throw new Error("Failed to update price.");
+            }
 
-  return (
-    <div className="bg-blue-50 min-h-screen flex items-center justify-center">
-      <div className="bg-white p-8 shadow-md rounded w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Update Dutch Auction Price
-        </h1>
-        {message && <p className="text-blue-600 mb-4 text-center">{message}</p>}
+            setAuctions(auctions.map(a =>
+                a.auction_id === auctionId ? { ...a, starting_price: newPrice } : a
+            ));
+            setMessage(`Auction has been updated to ${newPrice}`)
+        } catch (err) {
+            setError("Error updating price.");
+            console.log(`Error updating price: ${err}`);
+        }
+    };
 
-        <form onSubmit={handleUpdate} className="space-y-4">
-          <div>
-            <label className="block mb-1">Auction ID</label>
-            <input
-              className="border p-2 w-full rounded"
-              value={auctionId}
-              onChange={(e) => setAuctionId(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1">New Price</label>
-            <input
-              className="border p-2 w-full rounded"
-              type="number"
-              value={newPrice}
-              onChange={(e) => setNewPrice(e.target.value)}
-              required
-            />
-          </div>
+    return (
+        <div className="max-w-3xl mx-auto mt-8">
+            <h2 className="text-2xl font-bold mb-4">Your Dutch Auctions</h2>
 
-          {/* Display the current price */}
-          <div className="text-center my-4">
-            <p>
-              Current Price:{" "}
-              {currentPrice !== null ? (
-                <span className="font-semibold">${currentPrice}</span>
-              ) : (
-                "N/A"
-              )}
-            </p>
-          </div>
+            {loading && <p>Loading auctions...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {message}
+            {auctions.length === 0 && !loading ? (
+                <p>No Dutch auctions found.</p>
+            ) : (
+                
+                <ul className="space-y-4">
+                    {auctions.map((auction) => (
+                        <li key={auction.auction_id} className="border p-4 rounded-lg shadow-md">
+                            <h3 className="text-xl font-semibold">{auction.name}</h3>
+                            <p className="text-gray-700">{auction.description}</p>
+          
+                            <p className="text-gray-500">Price: ${auction?.starting_price || "No Price Listed"}</p>
+                            <input
+                                type="number"
+                                placeholder="Enter new price"
+                                value={priceInputs[auction.auction_id] || ""}
+                                onChange={(e) => handleInputChange(auction.auction_id, e.target.value)}
+                                className="mt-2 p-2 border rounded-lg w-full"
+                            />
+                            <button 
+                                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg"
+                                onClick={() => handleUpdatePrice(auction.auction_id)}
+                            >
+                                Update Price
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
 
-          <button
-            type="submit"
-            className="
-              bg-blue-600 hover:bg-blue-700 text-white 
-              px-4 py-2 rounded w-full transition-colors
-            "
-          >
-            Update Price
-          </button>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-export default UpdateDutch
+export default UpdateDutch;

@@ -26,6 +26,9 @@ router.post("/dutch/accept", auctionController.acceptDutchPrice);
 // Getting specific auction by ID (GET) - Move this to the end
 router.get("/:auctionId", auctionController.getAuction);
 
+// Getting the Dutch Auctions of the seller by user ID (GET)
+router.get("/seller/dutch/:userId", auctionController.getSellerDutchAuctions);
+
 // Gettings winnings of a user by userId (GET)
 router.get("/winnings/:userId", auctionController.getUserAuctionWinnings);
 
