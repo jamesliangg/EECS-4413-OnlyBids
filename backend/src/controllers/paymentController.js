@@ -1,6 +1,17 @@
 const paymentModel = require("../models/paymentModel");
 const auctionModel = require("../models/auctionModel");
 const exp = require("constants");
+const xss = require('xss');
+
+// Sanitize user input
+const sanitizeUserInput = (input) => {
+    if (typeof input !== 'string') return input;
+    return xss(input, {
+        whiteList: {}, // Don't allow any HTML tags
+        stripIgnoreTag: true, // Strip HTML tags
+        stripIgnoreTagBody: ['script'] // Strip script tags and their content
+    });
+};
 
 const paymentController = {
   attemptPayment: async (req, res) => {
@@ -19,21 +30,28 @@ const paymentController = {
         cvv,
       } = req.body;
 
+      // Sanitize all string inputs
+      const sanitizedAuctionId = sanitizeUserInput(auction_id);
+      const sanitizedBuyerId = sanitizeUserInput(buyer_id);
+      const sanitizedCardholder = sanitizeUserInput(cardholder);
+      const sanitizedExpDate = sanitizeUserInput(expDate);
+      const sanitizedCvv = sanitizeUserInput(cvv);
+
       // Get the auction to verify the winner
-      const auction = await auctionModel.getAuctionById(auction_id);
+      const auction = await auctionModel.getAuctionById(sanitizedAuctionId);
       if (!auction) {
         return res.status(404).json({ error: "Auction not found" });
       }
 
       // Check if the buyer is the winner
-      if (auction.winner_id != buyer_id) {
+      if (auction.winner_id != sanitizedBuyerId) {
         return res
           .status(400)
           .json({ error: "You are not the auction winner" });
       }
 
       // Validate input
-      if (!cardNum || !cardholder || !expDate || !cvv) {
+      if (!cardNum || !sanitizedCardholder || !sanitizedExpDate || !sanitizedCvv) {
         return res.status(400).json({ error: "All fields are required" });
       }
 
@@ -45,7 +63,7 @@ const paymentController = {
 
       var cardholderRegEx = new RegExp("^[a-zA-Z\\s]+$");
       // Validate cardholder name
-      if (!cardholderRegEx.test(cardholder)) {
+      if (!cardholderRegEx.test(sanitizedCardholder)) {
         return res.status(400).json({ error: "Invalid cardholder name" });
       }
 
@@ -60,18 +78,18 @@ const paymentController = {
       }
 
       if (
-        !expDateRegEx.test(expDate) ||
-        (parseInt(expDate.substring(3, 5)) < parseInt(year.substring(2, 4)) ||
-          (parseInt(expDate.substring(3, 5)) >=
+        !expDateRegEx.test(sanitizedExpDate) ||
+        (parseInt(sanitizedExpDate.substring(3, 5)) < parseInt(year.substring(2, 4)) ||
+          (parseInt(sanitizedExpDate.substring(3, 5)) >=
             parseInt(year.substring(2, 4)) &&
-            parseInt(expDate.substring(0, 2)) < parseInt(month)))
+            parseInt(sanitizedExpDate.substring(0, 2)) < parseInt(month)))
       ) {
         return res.status(400).json({ error: "Invalid card expiry date" });
       }
 
       var cvvRegEx = new RegExp("^[0-9]{3}$");
       // Validate cvv number
-      if (!cvvRegEx.test(cvv)) {
+      if (!cvvRegEx.test(sanitizedCvv)) {
         return res.status(400).json({ error: "Invalid CVV number" });
       }
 
@@ -88,15 +106,15 @@ const paymentController = {
 
       //Call paymentModel to create row in db
       const payment = await paymentModel.createPayment({
-        auction_id,
-        buyer_id,
+        auction_id: sanitizedAuctionId,
+        buyer_id: sanitizedBuyerId,
         amount: total,
         payment_status: "completed",
       });
 
       //Call auction to update auction status
       const auctionStatus = await auctionModel.updateAuctionStatus(
-        auction_id,
+        sanitizedAuctionId,
         "completed"
       );
 
@@ -121,8 +139,8 @@ const paymentController = {
         if (paymentData) {
           // Only attempt if we have the payment data
           await paymentModel.createPayment({
-            auction_id: paymentData.auction_id,
-            buyer_id: paymentData.buyer_id,
+            auction_id: sanitizeUserInput(paymentData.auction_id),
+            buyer_id: sanitizeUserInput(paymentData.buyer_id),
             amount: total,
             payment_status: "failed",
           });

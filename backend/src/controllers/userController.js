@@ -1,6 +1,7 @@
-const UserModel = require("../models/userModel");
-const bcrypt = require("bcryptjs");
-const validator = require("validator");
+const UserModel = require('../models/userModel');
+const bcrypt = require('bcryptjs');
+const validator = require('validator');
+const xss = require('xss');
 
 // Validates that a password only contains alphanumeric and specific special characters
 const isValidPassword = (password) => {
@@ -25,267 +26,247 @@ const isValidPassword = (password) => {
   return { valid: true };
 };
 
+// Sanitize user input
+const sanitizeUserInput = (input) => {
+    if (typeof input !== 'string') return input;
+    return xss(input, {
+        whiteList: {}, // Don't allow any HTML tags
+        stripIgnoreTag: true, // Strip HTML tags
+        stripIgnoreTagBody: ['script'] // Strip script tags and their content
+    });
+};
+
 const userController = {
-  signup: async (req, res) => {
-    try {
-      // Get the request body
-      const {
-        email,
-        password,
-        username,
-        security_question,
-        security_answer,
-        street,
-        city,
-        state,
-        postal_code,
-        country,
-      } = req.body;
+    signup: async (req, res) => {
+        try {
+            // Get the request body and sanitize all inputs
+            const { email, password, username, security_question, security_answer, street, city, state, postal_code, country } = req.body;
 
-      // Validate required fields
-      if (
-        !email ||
-        !password ||
-        !username ||
-        !security_question ||
-        !security_answer
-      ) {
-        return res.status(400).json({
-          error:
-            "Email, password, username, security question, and security answer are required",
-        });
-      }
+            // Sanitize all string inputs
+            const sanitizedEmail = sanitizeUserInput(email);
+            const sanitizedUsername = sanitizeUserInput(username);
+            const sanitizedSecurityQuestion = sanitizeUserInput(security_question);
+            const sanitizedSecurityAnswer = sanitizeUserInput(security_answer);
+            const sanitizedStreet = sanitizeUserInput(street);
+            const sanitizedCity = sanitizeUserInput(city);
+            const sanitizedState = sanitizeUserInput(state);
+            const sanitizedPostalCode = sanitizeUserInput(postal_code);
+            const sanitizedCountry = sanitizeUserInput(country);
 
-      // Validate email format
-      if (!validator.isEmail(email)) {
-        return res.status(400).json({ error: "Invalid email format" });
-      }
+            // Validate required fields
+            if (!sanitizedEmail || !password || !sanitizedUsername || !sanitizedSecurityQuestion || !sanitizedSecurityAnswer) {
+                return res.status(400).json({ error: 'Email, password, username, security question, and security answer are required' });
+            }
 
-      // Validate username is alphanumeric
-      if (!validator.isAlphanumeric(username)) {
-        return res
-          .status(400)
-          .json({ error: "Username must contain only letters and numbers" });
-      }
+            // Validate email format
+            if (!validator.isEmail(sanitizedEmail)) {
+                return res.status(400).json({ error: 'Invalid email format' });
+            }
 
-      // Validate username length
-      if (username.length > 50) {
-        return res
-          .status(400)
-          .json({ error: "Username must be less than 50 characters" });
-      }
+            // Validate username is alphanumeric
+            if (!validator.isAlphanumeric(sanitizedUsername)) {
+                return res.status(400).json({ error: 'Username must contain only letters and numbers' });
+            }
 
-      // Validate password format
-      const passwordCheck = isValidPassword(password);
-      if (!passwordCheck.valid) {
-        return res.status(400).json({ error: passwordCheck.reason });
-      }
+            // Validate username length
+            if (sanitizedUsername.length > 50) {
+                return res.status(400).json({ error: 'Username must be less than 50 characters' });
+            }
 
-      // Validate security question and answer
-      if (security_question.trim() === "") {
-        return res
-          .status(400)
-          .json({ error: "Security question cannot be empty" });
-      }
+            // Validate password format
+            const passwordCheck = isValidPassword(password);
+            if (!passwordCheck.valid) {
+                return res.status(400).json({ error: passwordCheck.reason });
+            }
 
-      if (security_answer.trim() === "") {
-        return res
-          .status(400)
-          .json({ error: "Security answer cannot be empty" });
-      }
+            // Validate security question and answer
+            if (sanitizedSecurityQuestion.trim() === '') {
+                return res.status(400).json({ error: 'Security question cannot be empty' });
+            }
 
-      // Validate postal code if provided
-      if (postal_code && postal_code.length > 20) {
-        return res
-          .status(400)
-          .json({ error: "Postal code must be less than 20 characters" });
-      }
+            if (sanitizedSecurityAnswer.trim() === '') {
+                return res.status(400).json({ error: 'Security answer cannot be empty' });
+            }
 
-      // Check if user already exists
-      const existingUser = await UserModel.findByEmail(email);
-      if (existingUser) {
-        return res.status(409).json({ error: "Email already registered" });
-      }
+            // Validate postal code if provided
+            if (sanitizedPostalCode && sanitizedPostalCode.length > 20) {
+                return res.status(400).json({ error: 'Postal code must be less than 20 characters' });
+            }
 
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+            // Check if user already exists
+            const existingUser = await UserModel.findByEmail(sanitizedEmail);
+            if (existingUser) {
+                return res.status(409).json({ error: 'Email already registered' });
+            }
 
-      // Hash security answer (for better security)
-      const hashedSecurityAnswer = await bcrypt.hash(security_answer, 10);
+            // Hash password
+            const hashedPassword = await bcrypt.hash(password, 10);
+            
+            // Hash security answer (for better security)
+            const hashedSecurityAnswer = await bcrypt.hash(sanitizedSecurityAnswer, 10);
 
-      // Create user with all fields
-      const user = await UserModel.create({
-        email,
-        password: hashedPassword,
-        username,
-        security_question,
-        security_answer: hashedSecurityAnswer,
-        street,
-        city,
-        state,
-        postal_code,
-        country,
-      });
+            // Create user with all sanitized fields
+            const user = await UserModel.create({
+                email: sanitizedEmail,
+                password: hashedPassword,
+                username: sanitizedUsername,
+                security_question: sanitizedSecurityQuestion,
+                security_answer: hashedSecurityAnswer,
+                street: sanitizedStreet,
+                city: sanitizedCity,
+                state: sanitizedState,
+                postal_code: sanitizedPostalCode,
+                country: sanitizedCountry
+            });
 
-      // Send a response with a 201 status code
-      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#successful_responses
-      res.status(201).json({
-        message: "User created successfully",
-        userId: user.insertId,
-      });
-    } catch (error) {
-      // Error handling
-      console.error("Signup error:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  },
+            res.status(201).json({
+                message: 'User created successfully',
+                userId: user.insertId
+            });
 
-  signin: async (req, res) => {
-    try {
-      // Get the request body
-      const { email, password } = req.body;
+        } catch (error) {
+            console.error('Signup error:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
 
-      // Validate required fields
-      if (!email || !password) {
-        return res
-          .status(400)
-          .json({ error: "Email and password are required" });
-      }
+    signin: async (req, res) => {
+        try {
+            // Get the request body and sanitize inputs
+            const { email, password } = req.body;
+            const sanitizedEmail = sanitizeUserInput(email);
 
-      // Validate email format
-      if (!validator.isEmail(email)) {
-        return res.status(400).json({ error: "Invalid email format" });
-      }
+            // Validate required fields
+            if (!sanitizedEmail || !password) {
+                return res.status(400).json({ error: 'Email and password are required' });
+            }
 
-      // Validate password format
-      const passwordCheck = isValidPassword(password);
-      if (!passwordCheck.valid) {
-        return res.status(400).json({ error: passwordCheck.reason });
-      }
+            // Validate email format
+            if (!validator.isEmail(sanitizedEmail)) {
+                return res.status(400).json({ error: 'Invalid email format' });
+            }
 
-      // Find user by email
-      const user = await UserModel.findByEmail(email);
-      if (!user) {
-        return res.status(401).json({ error: "Invalid email or password" });
-      }
+            // Validate password format
+            const passwordCheck = isValidPassword(password);
+            if (!passwordCheck.valid) {
+                return res.status(400).json({ error: passwordCheck.reason });
+            }
 
-      // Compare password with hashed password in database
-      const isValidPasswordMatch = await bcrypt.compare(
-        password,
-        user.password_hash
-      );
-      if (!isValidPasswordMatch) {
-        return res.status(401).json({ error: "Invalid email or password" });
-      }
+            // Find user by email
+            const user = await UserModel.findByEmail(sanitizedEmail);
+            if (!user) {
+                return res.status(401).json({ error: 'Invalid email or password' });
+            }
 
-      // Send success response with user data (excluding password)
-      const { password_hash, security_answer, ...userData } = user;
-      res.status(200).json({
-        message: "Sign in successful",
-        user: userData,
-      });
-    } catch (error) {
-      // Error handling
-      console.error("Signin error:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  },
+            // Compare password with hashed password in database
+            const isValidPasswordMatch = await bcrypt.compare(password, user.password_hash);
+            if (!isValidPasswordMatch) {
+                return res.status(401).json({ error: 'Invalid email or password' });
+            }
 
-  // Request password reset using security question
-  // Possibly disable this endpoint as reveals if email is registered or not
-  requestReset: async (req, res) => {
-    try {
-      const { email } = req.body;
+            // Send success response with user data (excluding password)
+            const { password_hash, security_answer, ...userData } = user;
+            res.status(200).json({
+                message: 'Sign in successful',
+                user: userData
+            });
 
-      // Validate required fields
-      if (!email) {
-        return res.status(400).json({ error: "Email is required" });
-      }
+        } catch (error) {
+            console.error('Signin error:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
 
-      // Validate email format
-      if (!validator.isEmail(email)) {
-        return res.status(400).json({ error: "Invalid email format" });
-      }
+    // Request password reset using security question
+    // Possibly disable this endpoint as reveals if email is registered or not
+    requestReset: async (req, res) => {
+        try {
+            const { email } = req.body;
+            const sanitizedEmail = sanitizeUserInput(email);
 
-      // Find user by email
-      const user = await UserModel.findByEmail(email);
-      if (!user) {
-        // Possibly disable this endpoint as reveals if email is registered or not
-        return res.status(200).json({
-          message:
-            "If your email is registered, you will receive the security question",
-        });
-      }
+            // Validate required fields
+            if (!sanitizedEmail) {
+                return res.status(400).json({ error: 'Email is required' });
+            }
 
-      // Return the security question
-      res.status(200).json({
-        message: "Security question retrieved",
-        security_question: user.security_question,
-      });
-    } catch (error) {
-      console.error("Request reset error:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  },
+            // Validate email format
+            if (!validator.isEmail(sanitizedEmail)) {
+                return res.status(400).json({ error: 'Invalid email format' });
+            }
 
-  // Reset password using security answer
-  resetPassword: async (req, res) => {
-    try {
-      const { email, security_answer, new_password } = req.body;
+            // Find user by email
+            const user = await UserModel.findByEmail(sanitizedEmail);
+            if (!user) {
+                // Possibly disable this endpoint as reveals if email is registered or not
+                return res.status(200).json({ 
+                    message: 'If your email is registered, you will receive the security question'
+                });
+            }
 
-      // Validate required fields
-      if (!email || !security_answer || !new_password) {
-        return res.status(400).json({
-          error: "Email, security answer, and new password are required",
-        });
-      }
+            // Return the security question
+            res.status(200).json({
+                message: 'Security question retrieved',
+                security_question: user.security_question
+            });
 
-      // Validate email format
-      if (!validator.isEmail(email)) {
-        return res.status(400).json({ error: "Invalid email format" });
-      }
+        } catch (error) {
+            console.error('Request reset error:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
 
-      // Validate new password format
-      const passwordCheck = isValidPassword(new_password);
-      if (!passwordCheck.valid) {
-        return res.status(400).json({ error: passwordCheck.reason });
-      }
+    // Reset password using security answer
+    resetPassword: async (req, res) => {
+        try {
+            const { email, security_answer, new_password } = req.body;
+            const sanitizedEmail = sanitizeUserInput(email);
+            const sanitizedSecurityAnswer = sanitizeUserInput(security_answer);
 
-      // Find user by email
-      const user = await UserModel.findByEmail(email);
-      if (!user) {
-        // For security reasons, don't reveal that the email doesn't exist
-        return res
-          .status(401)
-          .json({ error: "Invalid email or security answer" });
-      }
+            // Validate required fields
+            if (!sanitizedEmail || !sanitizedSecurityAnswer || !new_password) {
+                return res.status(400).json({ error: 'Email, security answer, and new password are required' });
+            }
 
-      // Verify security answer
-      const isValidAnswer = await bcrypt.compare(
-        security_answer,
-        user.security_answer
-      );
-      if (!isValidAnswer) {
-        return res
-          .status(401)
-          .json({ error: "Invalid email or security answer" });
-      }
+            // Validate email format
+            if (!validator.isEmail(sanitizedEmail)) {
+                return res.status(400).json({ error: 'Invalid email format' });
+            }
 
-      // Hash new password
-      const hashedPassword = await bcrypt.hash(new_password, 10);
+            // Validate new password format
+            const passwordCheck = isValidPassword(new_password);
+            if (!passwordCheck.valid) {
+                return res.status(400).json({ error: passwordCheck.reason });
+            }
 
-      // Update user's password
-      await UserModel.updatePassword(user.user_id, hashedPassword);
+            // Find user by email
+            const user = await UserModel.findByEmail(sanitizedEmail);
+            if (!user) {
+                // For security reasons, don't reveal that the email doesn't exist
+                return res.status(401).json({ error: 'Invalid email or security answer' });
+            }
 
-      res.status(200).json({
-        message: "Password reset successful",
-      });
-    } catch (error) {
-      console.error("Reset password error:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  },
+            // Verify security answer
+            const isValidAnswer = await bcrypt.compare(sanitizedSecurityAnswer, user.security_answer);
+            if (!isValidAnswer) {
+                return res.status(401).json({ error: 'Invalid email or security answer' });
+            }
 
+            // Hash new password
+            const hashedPassword = await bcrypt.hash(new_password, 10);
+
+            // Update user's password
+            await UserModel.updatePassword(user.user_id, hashedPassword);
+
+            res.status(200).json({
+                message: 'Password reset successful'
+            });
+
+        } catch (error) {
+            console.error('Reset password error:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
+  
   findUserAddress: async (res, req) => {
     const { userId } = req.params;
     try {
