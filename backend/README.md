@@ -32,7 +32,7 @@ docker-compose logs
 
 # Sample Data
 ## Generating Init Data
-To generate password/security answer hashes, go to the `backend/generateHash.js` file and update the `password` variable.
+To generate password/security answer hashes, go to the `backend/scripts/generateHash.js` file and update the `password` variable.
 Then run
 ```
 node scripts/generateHash.js
