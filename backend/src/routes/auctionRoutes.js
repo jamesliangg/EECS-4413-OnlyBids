@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const auctionController = require("../controllers/auctionController");
-
+const upload = require("../config/upload");
 // Creating bid (POST)
 router.post("/bid", auctionController.placeBid);
 
 // Creating auction (POST)
-router.post("/create", auctionController.createAuction);
+router.post("/create", upload.single("image") ,auctionController.createAuction);
 
 // Getting active auctions (GET)
 router.get("/auctions", auctionController.getAuctions);

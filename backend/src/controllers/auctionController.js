@@ -1,8 +1,8 @@
 const AuctionModel = require("../models/auctionModel");
 const socketConfig = require("../config/socket");
 const ItemModel = require("../models/itemModel");
-const xss = require("xss");
-
+const upload = require("../config/upload");
+const xss = require('xss');
 // Sanitize user input
 const sanitizeUserInput = (input) => {
   if (typeof input !== "string") return input;
@@ -84,13 +84,14 @@ const auctionController = {
     const sanitizedEndTime = sanitizeUserInput(end_time);
     const sanitizedType = sanitizeUserInput(type);
 
+    const image = req.file;
+
     // Validate that all required parameters are present
     const requiredParams = [
       "seller_id",
       "name",
       "description",
       "starting_price",
-      "image_url",
       "start_time",
       "end_time",
       "type",
@@ -145,7 +146,7 @@ const auctionController = {
         name: sanitizedName,
         description: sanitizedDescription,
         starting_price,
-        image_url: sanitizedImageUrl,
+        image_url: `/uploads/${image.filename}`,
       });
       if (!item_id)
         return res.status(500).json({ error: "Item creation failed" });

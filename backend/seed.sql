@@ -21,11 +21,11 @@ INSERT INTO User (username, email, password_hash, security_question, security_an
 
 -- Insert items for auctions
 INSERT INTO Item (seller_id, name, description, starting_price, image_url) VALUES
-(1, 'Vintage Watch', 'A beautiful watch from the 1950s', 199.99, 'https://example.com/watch.jpg'),
-(2, 'Gaming Console', 'Lastest console from Xony, barely used', 299.99, 'https://example.com/console.jpg'),
-(3, 'YorkU Lmap', 'Lamp with YorkU logo', 200.99, 'https://example.com/lamp.jpg'),
-(4, 'Rare Comic Book', 'First edition, mint condition', 20.99, 'https://example.com/comic.jpg'),
-(5, 'Antique Vase', 'Heirloom vase from the 1800s', 90.99, 'https://example.com/vase.jpg');
+(1, 'Vintage Watch', 'A beautiful watch from the 1950s', 199.99, '/uploads/cat.png'),
+(2, 'Gaming Console', 'Lastest console from Xony, barely used', 299.99,  '/uploads/cat.png'),
+(3, 'YorkU Lmap', 'Lamp with YorkU logo', 200.99,  '/uploads/cat.png'),
+(4, 'Rare Comic Book', 'First edition, mint condition', 20.99,  '/uploads/cat.png'),
+(5, 'Antique Vase', 'Heirloom vase from the 1800s', 90.99,  '/uploads/cat.png');
 
 -- Insert auctions (3 forward, 2 dutch)
 -- Using variables to set end time 3 hours from now

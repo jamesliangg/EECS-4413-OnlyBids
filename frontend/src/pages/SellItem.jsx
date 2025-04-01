@@ -13,105 +13,76 @@ function SellItem() {
   const [sellMsg, setSellMsg] = useState("")
   const [name, setName] = useState("")
 
-  const handleUpload = (e) => {
-    e.preventDefault()
-    if (!picture) {
-      setUploadMsg("No picture selected.")
-      return
-    }
-    const formData = new FormData()
-    formData.append("picture", picture)
 
-    fetch("/api/uploadItemPics", {
-      method: "POST",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          setUploadMsg("Error: ${data.error}")
-          console.log("EROR", data.error)
-        }
-        else setUploadMsg("Picture uploaded successfully!")
-      })
-      .catch((err) => {
-        console.error(err)
-        setUploadMsg("Error uploading picture.")
-      })
-  }
-
-  const handleSellItem = (e) => {
-    e.preventDefault()
-    
-    const days = parseInt(durationDays) || 0;
-  const hours = parseInt(durationHours) || 0;
-  const minutes = parseInt(durationMinutes) || 0;
+  const handleSellItem = async (e) => {
+    e.preventDefault();
   
-  if (minutes < 1) {
-    setSellMsg("Duration must be at least 1 minute");
-    return;
-  }
-
-  // Calculate end time
-  const now = new Date();
-  const endTime = new Date(
-    now.getTime() + 
-    days * 24 * 60 * 60 * 1000 + 
-    hours * 60 * 60 * 1000 + 
-    minutes * 60 * 1000
-  );
-
-  // Use ISO strings (UTC format)
-  const payload = {
-    description,
-    type: auctionType,
-    start_time: now.toISOString(), 
-    end_time: endTime.toISOString(),
-    starting_price: startingBid,
-    seller_id: userID,
-    image_url: "url", 
-    name
-  }
-    fetch("http://localhost:3000/api/auction/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) setSellMsg("Error: ${data.error}")
-        else setSellMsg("Item submitted successfully!")
-      })
-      .catch((err) => {
-        console.error(err)
-        setSellMsg("Error submitting item.")
-      })
-  }
+    if (!picture) {
+      setSellMsg("Please upload an image.");
+      return;
+    }
+  
+    const days = parseInt(durationDays) || 0;
+    const hours = parseInt(durationHours) || 0;
+    const minutes = parseInt(durationMinutes) || 0;
+  
+    if (minutes < 1) {
+      setSellMsg("Duration must be at least 1 minute.");
+      return;
+    }
+  
+    // Calculate end time
+    const now = new Date();
+    const endTime = new Date(
+      now.getTime() +
+      days * 24 * 60 * 60 * 1000 +
+      hours * 60 * 60 * 1000 +
+      minutes * 60 * 1000
+    );
+  
+    // Create FormData object
+    const formData = new FormData();
+    formData.append("image", picture);
+    formData.append("description", description);
+    formData.append("type", auctionType);
+    formData.append("start_time", now.toISOString());
+    formData.append("end_time", endTime.toISOString());
+    formData.append("starting_price", startingBid);
+    formData.append("seller_id", userID);
+    formData.append("name", name);
+  
+    try {
+      const response = await fetch("http://localhost:3000/api/auction/create", {
+        method: "POST",
+        body: formData, // Send FormData instead of JSON
+      });
+  
+      const data = await response.json();
+  
+      if (data.error) {
+        setSellMsg(`Error: ${data.error}`);
+      } else {
+        setSellMsg("Item submitted successfully!");
+      }
+    } catch (error) {
+      console.error(error);
+      setSellMsg("Error submitting item.");
+    }
+  };
+  
 
   return (
     <div className="bg-blue-50 min-h-screen flex items-center justify-center">
       <div className="bg-white p-8 shadow-md rounded w-full max-w-md space-y-8">
         <h1 className="text-2xl font-bold mb-4 text-center">Sell Item</h1>
 
-        <form onSubmit={handleUpload} className="border p-4 space-y-4 rounded"> {/* uploading pictures*/}
+     
           <p className="font-semibold">Upload Picture of The Item</p>
-          {uploadMsg && <p className="text-blue-600">{uploadMsg}</p>}
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setPicture(e.target.files[0])}
           />
-          <button
-            className="
-              bg-blue-600 hover:bg-blue-700 text-white 
-              px-4 py-2 rounded transition-colors
-            "
-            type="submit"
-          >
-            Upload
-          </button>
-        </form>
-
         <form onSubmit={handleSellItem} className="border p-4 space-y-4 rounded">
           {sellMsg && <p className="text-blue-600">{sellMsg}</p>}
           <div>

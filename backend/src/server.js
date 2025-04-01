@@ -9,12 +9,15 @@ const http = require("http");
 const cors = require("cors");
 const requestLogger = require("./middleware/requestLogger");
 
+
 require("dotenv").config();
 
 const app = express();
 
 // Enable CORS
 app.use(cors());
+
+app.use("/uploads", express.static("public/uploads"));
 
 // Middleware to parse JSON bodies
 // https://expressjs.com/en/api.html#express.json

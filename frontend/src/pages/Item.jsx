@@ -56,7 +56,7 @@ const AuctionItem = ({ auction, isSelected, onClick }) => {
       onClick();
     }}
   >      
-      <img src={image_url} alt={name} width={200} />
+      <img src={`http://localhost:3000${image_url}`} alt={name} width={200} />
       <p className="font-semibold">{name}</p>
       <p>Current Price: {final_price !== null ? final_price : starting_price}</p>
       <p>Auction Type: {type || "N/A"}</p>
