@@ -17,7 +17,7 @@ function SignUp() {
   const [error, setError] = useState("")
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState("")  
-
+  const [state, setState] = useState("")
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -82,10 +82,11 @@ function SignUp() {
       firstName,
       lastName,
       unitNumber,
-      streetName,
+      street: streetName,
       city,
       country,
-      postalCode,
+      state,
+      postal_code: postalCode,
       security_question: question,
       security_answer: answer
     }
@@ -191,6 +192,16 @@ function SignUp() {
               className="border p-2 w-full rounded"
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1">State/Province</label>
+            <input
+              className="border p-2 w-full rounded"
+          
+              value={state}
+              onChange={(e) => setState(e.target.value)}
               required
             />
           </div>
