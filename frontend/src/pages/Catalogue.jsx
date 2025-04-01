@@ -45,7 +45,9 @@ function Catalogue() {
   const handleSearch = (e) => {
     e.preventDefault();
     setError("");
-    fetch(`http://localhost:3000/api/search/fullsearch?keyword=${encodeURIComponent(keyword)}`)
+    const url = keyword === "" ? `http://localhost:3000/api/search/fullsearch`: `http://localhost:3000/api/search/fullsearch?keyword=${encodeURIComponent(keyword)}`
+    console.log(url);
+    fetch(url)
       .then((res) => {
         if (!res.ok) throw new Error("Search failed");
         return res.json();
@@ -115,7 +117,6 @@ function Catalogue() {
             placeholder="Search items..."
             value={keyword}
             onChange={handleInputChange}
-            required
           />
     
           {showDropdown && (

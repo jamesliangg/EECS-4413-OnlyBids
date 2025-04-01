@@ -4,18 +4,25 @@ const SearchModel =  {
 
     // For autocompletion
     findItemsAutocompletion: async (keyWord) => {
-        const [result] = await db.query(
-            `SELECT name, image_url FROM Item WHERE LOWER(name) LIKE LOWER(?) LIMIT 10`,
-            [`%${keyWord}%`]
+        const searchPattern = `%${keyWord}%`;
+        const [result]  = await db.query(
+        `SELECT 
+            i.name,
+            i.image_url
+        FROM Auction a
+        JOIN Item i ON a.item_id = i.item_id
+        WHERE a.status = 'ongoing' 
+        AND (LOWER(i.name) LIKE LOWER(?) OR LOWER(i.description) LIKE LOWER(?))
+        ORDER BY a.start_time DESC;`,
+        [searchPattern, searchPattern]
         );
         return result;
     },
     
     // For search button
     findItemsFullSearch: async(keyWord) => {
-        const searchPattern = `%${keyWord}%`;
-        const [result]  = await db.query(
-        `SELECT 
+        let query = `
+        SELECT 
             a.auction_id, 
             i.name, 
             i.description, 
@@ -29,13 +36,22 @@ const SearchModel =  {
             a.type
         FROM Auction a
         JOIN Item i ON a.item_id = i.item_id
-        WHERE a.status = 'ongoing' 
-        AND (LOWER(i.name) LIKE LOWER(?) OR LOWER(i.description) LIKE LOWER(?))
-        ORDER BY a.start_time DESC;`,
-        [searchPattern, searchPattern]
-        );
-        
-        return result;
+        WHERE a.status = 'ongoing'
+    `;
+
+    let params = [];
+
+    // If keyword exists, apply search filter
+    if (keyWord) {
+        query += ` AND (LOWER(i.name) LIKE LOWER(?) OR LOWER(i.description) LIKE LOWER(?))`;
+        const searchPattern = `%${keyWord}%`;
+        params.push(searchPattern, searchPattern);
+    }
+
+    query += ` ORDER BY a.start_time DESC;`;
+
+    const [result] = await db.query(query, params);
+    return result;
     },
 
     findItemByAuctionId: async(auctionID) => {

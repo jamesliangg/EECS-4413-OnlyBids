@@ -14,7 +14,7 @@ const sanitizeUserInput = (input) => {
 // Validates that a search keyword only contains alphanumeric, spaces, and special characters
 const isValidSearchKeyword = (keyword) => {
     // Allow alphanumeric characters, spaces, and common special characters for search
-    const validKeywordRegex = /^[A-Za-z0-9!@#$%^&*()\s]+$/;
+    const validKeywordRegex = /^[A-Za-z0-9!@#$%^&*()\s]*$/;
     
     return validKeywordRegex.test(keyword);
 };
@@ -47,22 +47,20 @@ const searchController = {
     fullSearch: async (req, res) => {
         try {
             const { keyword } = req.query;
-            const sanitizedKeyword = sanitizeUserInput(keyword);
-
-            if (!sanitizedKeyword) {
-                return res.status(400).json({ error: 'Keyword is required' });
-            }
+            let sanitizedKeyword = keyword ? sanitizeUserInput(keyword) : "";
 
             // Validate keyword format
-            if (!isValidSearchKeyword(sanitizedKeyword)) {
-                return res.status(400).json({ error: 'Search keyword contains invalid characters' });
+            if (sanitizedKeyword && !isValidSearchKeyword(sanitizedKeyword)) {
+                return res.status(400).json({ error: "Search keyword contains invalid characters" });
             }
 
+            // Fetch results
             const results = await SearchModel.findItemsFullSearch(sanitizedKeyword);
+
             res.json(results);
         } catch (error) {
             console.error(error);
-            res.status(500).json({ error: 'Server error' });
+            res.status(500).json({ error: "Server error" });
         }
     },
 
