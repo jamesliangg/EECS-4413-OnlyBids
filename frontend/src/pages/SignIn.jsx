@@ -12,7 +12,10 @@ function SignIn() {
   const handleSubmit = (e) => {
     e.preventDefault()
     setError("")
-
+    if(!email.trim() || !password.trim()) {
+      setError("Email or Password is empty");
+      return;
+    }
     fetch("http://localhost:3000/api/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

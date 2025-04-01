@@ -16,11 +16,64 @@ function SignUp() {
   const [postalCode, setPostalCode] = useState("")
   const [error, setError] = useState("")
   const [question, setQuestion] = useState("")
-  const [answer, setAnswer] = useState("")
+  const [answer, setAnswer] = useState("")  
+
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setError("")
+    
+    if (!username.trim()) { 
+      setError("Username is required")
+      return;
+    };
+    if(!password.trim()) {
+      setError("Email is required")
+      return;
+    }
+    if(!firstName.trim()) {
+      setError("Firstname is required")
+      return;
+    }
+    if(!lastName.trim()) {
+      setError("Lastname is required")
+      return;
+    }
+    if(!password.trim()) {
+      setError("Password is required")
+      return;
+    }
+    if(!email.trim()) {
+      setError("Email is required")
+      return;
+    }
+    if(!streetName.trim()) {
+      setError("Steetname is required")
+      return;
+    }
+    if(!city.trim()) {
+      setError("City is required")
+      return;
+    }
+
+    if(!country.trim()) {
+      setError("Country is required")
+      return;
+    }
+    
+    if(!postalCode.trim()) {
+      setError("Postal Code is required")
+      return;
+    }
+    if(!question.trim()) {
+      setError("Question is required")
+      return;
+    }
+
+    if(!answer.trim()) {
+      setError("Answer is required")
+      return;
+    }
 
     const payload = {
       username,
