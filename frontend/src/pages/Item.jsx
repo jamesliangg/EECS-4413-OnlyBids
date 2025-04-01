@@ -60,9 +60,8 @@ const AuctionItem = ({ auction, isSelected, onClick }) => {
       <p className="font-semibold">{name}</p>
       <p>Current Price: {final_price !== null ? final_price : starting_price}</p>
       <p>Auction Type: {type || "N/A"}</p>
-      <p>Status: {status}</p>
       <p>Time left: {timeLeft || "N/A"}</p>
-      <p>Description: {description}</p>
+      <p>{description}</p>
     </div>
   );
 };

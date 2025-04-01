@@ -12,6 +12,7 @@ function SellItem() {
   const [uploadMsg, setUploadMsg] = useState("")
   const [sellMsg, setSellMsg] = useState("")
   const [name, setName] = useState("")
+  const [errorMes, setErrorMes] = useState("")
 
 
   const handleSellItem = async (e) => {
@@ -21,7 +22,25 @@ function SellItem() {
       setSellMsg("Please upload an image.");
       return;
     }
-  
+    
+    if (!description.trim()) {
+      setErrorMes("Description is empty.");
+      return;
+    }
+    if (!name.trim()) {
+      setErrorMes("Name is empty.");
+      return;
+    }
+    if (!type.trim()) {
+      setErrorMes("Type is empty.");
+      return;
+    }
+    
+    if (!startingBid.trim()) {
+      setErrorMes("Starting Bid is empty.");
+      return;
+    }
+
     const days = parseInt(durationDays) || 0;
     const hours = parseInt(durationHours) || 0;
     const minutes = parseInt(durationMinutes) || 0;
@@ -85,6 +104,7 @@ function SellItem() {
           />
         <form onSubmit={handleSellItem} className="border p-4 space-y-4 rounded">
           {sellMsg && <p className="text-blue-600">{sellMsg}</p>}
+          {errorMes && <p className="text-red-600">{errorMes}</p>} 
           <div>
             <label className="block mb-1">Name</label>
             <textarea
