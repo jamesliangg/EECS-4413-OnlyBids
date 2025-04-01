@@ -3,11 +3,17 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 function Receipt() {
   const navigate = useNavigate();
-  const { auction_id, user_id, final_price } = useLocation().state;
+  const { auction_id, user_id, final_price, is_expedited } =
+    useLocation().state;
   const [error, setError] = useState("");
-  const [amountPaid, setAmountPaid] = useState(0);
-  const [shippingDays] = useState(14);
+  const [shippingDays, setShippingDays] = useState(14);
   const [userData, setUserData] = useState("");
+
+  useEffect(() => {
+    if (is_expedited === true) {
+      setShippingDays(7);
+    }
+  }, [is_expedited]);
 
   // Get the prices of the auction
   useEffect(() => {
@@ -20,9 +26,6 @@ function Receipt() {
       })
       .then((data) => {
         console.log(data);
-        setAmountPaid(
-          parseFloat(data[0].final_price) + parseFloat(data[0].shipping_price)
-        );
       })
       .catch((err) => {
         console.error(err);

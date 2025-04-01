@@ -126,7 +126,12 @@ function Payment() {
         } else {
           setMessage(data.message || "Payment successful!");
           navigate("/receipt", {
-            state: { auction_id, user_id, final_price: finalPrice },
+            state: {
+              auction_id,
+              user_id,
+              final_price: finalPrice,
+              is_expedited,
+            },
           });
         }
       })
