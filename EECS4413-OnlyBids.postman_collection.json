@@ -1379,6 +1379,73 @@
 					],
 					"cookie": [],
 					"body": "{\n    \"error\": \"Email already registered\"\n}"
+				},
+				{
+					"name": "XSS Test Part 1",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"example@exeample.com\",\n    \"password\": \"securePassword123\",\n    \"username\": \"exampleeUser\",\n    \"street\": \"<script>alert('XSS');</script><b>bold text</b>\",\n    \"city\": \"Anytown\",\n    \"state\": \"CA\",\n    \"postal_code\": \"12345\",\n    \"country\": \"USA\",\n    \"security_question\": \"In what city did your parents meet?\",\n    \"security_answer\": \"Ansgonton\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"signup"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "50"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"32-fU0guB5sQq3hyy0SrJxm3znPmDk\""
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 30 Mar 2025 21:08:02 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"User created successfully\",\n    \"userId\": 8\n}"
 				}
 			]
 		},
@@ -1680,6 +1747,140 @@
 					],
 					"cookie": [],
 					"body": "{\n    \"error\": \"Password cannot contain spaces\"\n}"
+				},
+				{
+					"name": "Attempt SQL Injection",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"jane@example.com\",\n    \"password\": \"' or ''1=1'\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/signin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"signin"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "42"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"2a-r3eg7r7A866vqbW9vcGsRxs1bJ8\""
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 30 Mar 2025 20:50:03 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": \"Password cannot contain spaces\"\n}"
+				},
+				{
+					"name": "XSS Test Part 2",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"example@exeample.com\",\n    \"password\": \"securePassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/signin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"signin"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "297"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"129-HUYNgK7DaKmRb/e1HNEnbMLNnXY\""
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 30 Mar 2025 21:08:34 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Sign in successful\",\n    \"user\": {\n        \"user_id\": 8,\n        \"username\": \"exampleeUser\",\n        \"email\": \"example@exeample.com\",\n        \"security_question\": \"In what city did your parents meet?\",\n        \"street\": \"bold text\",\n        \"city\": \"Anytown\",\n        \"state\": \"CA\",\n        \"postal_code\": \"12345\",\n        \"country\": \"USA\",\n        \"created_at\": \"2025-03-30T21:08:02.000Z\"\n    }\n}"
 				}
 			]
 		},
@@ -3405,7 +3606,8 @@
 						"auction",
 						"create"
 					]
-				}
+				},
+				"description": "Postman request doesn't work anymore as image upload is required"
 			},
 			"response": [
 				{
@@ -4126,6 +4328,248 @@
 					],
 					"cookie": [],
 					"body": "{\n    \"error\": \"Price must be greater than 0\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get User Data",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/data/user/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"data",
+						"user",
+						"1"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Data of User ID: 1",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/data/user/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"data",
+								"user",
+								"1"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "162"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"a2-f296zaqDgkiycNdfiXI8OChvpQ4\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 01 Apr 2025 22:12:00 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"username\": \"john_doe\",\n        \"email\": \"john@example.com\",\n        \"street\": \"1 Stone Corner Court\",\n        \"city\": \"Toronto\",\n        \"state\": \"Ontario\",\n        \"postal_code\": \"M5V 2T6\",\n        \"country\": \"Canada\"\n    }\n]"
+				},
+				{
+					"name": "Get Data of User ID: 2",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/data/user/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"data",
+								"user",
+								"2"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "173"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"ad-5SfaJ2li4J53NuP96+YYgmFMhnA\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 01 Apr 2025 22:12:36 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"username\": \"jane_smith\",\n        \"email\": \"jane@example.com\",\n        \"street\": \"69 Graedel Parkway\",\n        \"city\": \"Vancouver\",\n        \"state\": \"British Columbia\",\n        \"postal_code\": \"V6B 3K9\",\n        \"country\": \"Canada\"\n    }\n]"
+				},
+				{
+					"name": "Get Data of User ID: 3",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/data/user/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"data",
+								"user",
+								"3"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "164"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"a4-RVaD0oiT7EXVB9Nos2Q/qKuK1ho\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 01 Apr 2025 22:12:53 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"username\": \"bob_wilson\",\n        \"email\": \"bob@example.com\",\n        \"street\": \"2 Doe Crossing Circle\",\n        \"city\": \"Montreal\",\n        \"state\": \"Quebec\",\n        \"postal_code\": \"H3B 2Y5\",\n        \"country\": \"Canada\"\n    }\n]"
 				}
 			]
 		}
