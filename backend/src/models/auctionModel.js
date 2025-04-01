@@ -19,9 +19,9 @@ const AuctionModel = {
   },
 
   //Update Auction status for buyer
-  updateAuctionStatus: async (auctionId, status) => {
+  updateAuctionPaymentStatus: async (auctionId, status) => {
     const [result] = await db.query(
-      "UPDATE Auction SET status = ? WHERE auction_id = ?",
+      "UPDATE Auction SET payment_status = ? WHERE auction_id = ?",
       [status, auctionId]
     );
     return result;
@@ -115,7 +115,7 @@ const AuctionModel = {
       SELECT a.*, i.name, i.description, i.image_url 
       FROM Auction a
       JOIN Item i ON a.item_id = i.item_id
-      WHERE a.winner_id = ? AND a.status = 'completed'
+      WHERE a.winner_id = ? AND a.status = 'completed' AND a.payment_status = 'pending'
     `;
     try {
       const [result] = await db.query(query, [userId]);

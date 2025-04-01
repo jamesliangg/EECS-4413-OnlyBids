@@ -33,6 +33,7 @@ CREATE TABLE Auction (
     end_time DATETIME NOT NULL,
     status ENUM('ongoing', 'completed', 'canceled') DEFAULT 'ongoing',
     type ENUM('forward', 'dutch') DEFAULT 'forward',
+    payment_status ENUM('pending', 'completed') DEFAULT 'pending',
     winner_id INT NULL,
     final_price DECIMAL(10,2) NULL,
     shipping_price DECIMAL(10,2) DEFAULT 8.00,

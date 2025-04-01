@@ -113,7 +113,7 @@ const paymentController = {
       });
 
       //Call auction to update auction status
-      const auctionStatus = await auctionModel.updateAuctionStatus(
+      const auctionStatus = await auctionModel.updateAuctionPaymentStatus(
         sanitizedAuctionId,
         "completed"
       );
